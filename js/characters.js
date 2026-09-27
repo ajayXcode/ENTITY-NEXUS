@@ -52,6 +52,28 @@ const CHARACTERS = [
     prompt: 'relentless fearless ninja, fast agile and quick to close, keep a tight guard while charging in'
   },
   {
+    id: 'malgrave',
+    name: 'MALGRAVE',
+    title: 'The Violet Glaive',
+    tier: 'Epic',
+    species: 'Revenant Knight',
+    style: 'Glaive Mastery',
+    weapons: 'Void glaive',
+    role: 'Zoner',
+    traits: ['Stern', 'Patient', 'Unrelenting'],
+    palette: ['#a78bfa', '#4c1d95', '#0f172a', '#c4b5fd'],
+    accent: '#a78bfa',
+    hue: 262,
+    /* Ships real battle art - the violet glaive knight from Character 2. */
+    sprite: true,
+    /* Tuned against the real parsePrompt(): TACTICIAN, 0.56 / 0.93 / 0.46.
+       The stat line is unique in the registry, and it is the parser that
+       produced it, not this comment - run tools or js/characters.js and
+       check. 'immovable' is a COMPOUND (its own defense bump), so the
+       wording has to be kept whole if anyone edits this. */
+    prompt: 'relentless glaive knight, immovable and quick, guard high, punishes the opening'
+  },
+  {
     id: 'witcher',
     name: 'THE WITCHER',
     title: 'The Silent Blade',
@@ -261,28 +283,7 @@ const CHARACTERS = [
     hue: 210,
     prompt: 'immovable enforcer, heavy and grounded, strike back'
   },
-  {
-    id: 'malgrave',
-    name: 'MALGRAVE',
-    title: 'The Violet Glaive',
-    tier: 'Epic',
-    species: 'Revenant Knight',
-    style: 'Glaive Mastery',
-    weapons: 'Void glaive',
-    role: 'Zoner',
-    traits: ['Stern', 'Patient', 'Unrelenting'],
-    palette: ['#a78bfa', '#4c1d95', '#0f172a', '#c4b5fd'],
-    accent: '#a78bfa',
-    hue: 262,
-    /* Ships real battle art - the violet glaive knight from Character 2. */
-    sprite: true,
-    /* Tuned against the real parsePrompt(): TACTICIAN, 0.56 / 0.93 / 0.46.
-       The stat line is unique in the registry, and it is the parser that
-       produced it, not this comment - run tools or js/characters.js and
-       check. 'immovable' is a COMPOUND (its own defense bump), so the
-       wording has to be kept whole if anyone edits this. */
-    prompt: 'relentless glaive knight, immovable and quick, guard high, punishes the opening'
-  },
+
   {
     id: 'orion',
     name: 'ORION',
