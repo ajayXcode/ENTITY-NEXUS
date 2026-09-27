@@ -86,6 +86,7 @@ const CHARACTERS = [
     palette: ['#f2f2f2', '#9aa3ad', '#3a3f45', '#b3261e', '#7ec8e3'],
     accent: '#7ec8e3',
     hue: 180,
+    portrait: true,
     prompt: 'calm and strategic swordsman, patient counter puncher, quick to pressure then punish the opening'
   },
   {
@@ -131,6 +132,7 @@ const CHARACTERS = [
     palette: ['#3b3f7a', '#14161c', '#6b6f78', '#7d4bd6'],
     accent: '#7d4bd6',
     hue: 270,
+    portrait: true,
     prompt: 'silent hollow assassin, careful but fast, dodge everything and strike from behind'
   },
   {
@@ -364,6 +366,7 @@ const Characters = {
     baseScale: 2.5,          // js/game.js's Fighter scale, both sides
 
     has(c) { return !!(c && c.sprite) },
+    hasPortrait(c) { return !!(c && (c.sprite || c.portrait)) },
 
     dir(c, side) {
       return 'assets/img/champ/' + c.id + '/' + (side === 2 ? 'p2' : 'p1') + '/'
@@ -609,9 +612,9 @@ const Characters = {
         `</div>`
       : ''
 
-    /* A champion that ships real battle art shows it. The rest keep the
+    /* A champion that ships real battle art or portrait shows it. The rest keep the
        crest, because a portrait of a hue-rotate filter is not a portrait. */
-    const portrait = this.ART.has(c)
+    const portrait = this.ART.hasPortrait(c)
       ? `<figure class="ch-art"><img src="${this.ART.portrait(c)}" alt="${c.name}"
            loading="lazy" width="320" height="320" />
          <figcaption>Battle art</figcaption></figure>`
