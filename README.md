@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ENTITY NEXUS
 
 **Cast a line of film dialogue. Watch it fight. Bet on someone else's.**
@@ -484,3 +485,6 @@ entity-nexus.css dialogues.css wallet.css champions.css matchup.css
   left alone on purpose.
 
 Built for Monad Testnet.
+=======
+# ENTITY-NEXUS
+>>>>>>> ab83ee4da908dd7c44797e7c5bf8b810a8e6d3df

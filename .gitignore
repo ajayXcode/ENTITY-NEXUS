@@ -40,6 +40,10 @@ _legacy-assetforge/
 # js/hexgl.js, is not loaded by any page any more.
 games/
 
+# The hero streams from CloudFront; these are the local source clips the
+# upload came from (9.7MB). Nothing on the site loads them.
+assets/video/
+
 # The landing-page script from before the cabinet existed. No page has a
 # <script src="site.js"> tag; its sibling site.css is still loaded by
 # spectate.html for the band tokens, which is why it stays.
