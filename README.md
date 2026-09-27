@@ -31,7 +31,7 @@ Live on **Monad Testnet** (chain `10143`):
 
 ## 🚀 Getting Started
 
-**Live Demo:** [https://entitynexsus.onrender.com](https://entitynexsus.onrender.com) *(Render free tier — may take a few seconds to cold-start)*
+**Live Demo:** [https://entitynexus.onrender.com](https://entitynexus.onrender.com) *(Render free tier — may take a few seconds to cold-start)*
 
 ### Local Setup
 
