@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 64" role="img" aria-label="Frost glaive">
+<rect x="8" y="30" width="60" height="4" rx="2" fill="#cfd6e0"/>
+    <path d="M66 6 Q100 20 106 32 Q100 44 66 58 Q80 32 66 6 Z" fill="#93c5fd"/>
+    <path d="M66 6 Q80 32 66 58" fill="none" stroke="#cfd6e0" stroke-width="2.4"/>
+    <circle cx="16" cy="32" r="5" fill="#93c5fd"/>
+    <path d="M78 24 l5 8 -6 0 z" fill="#cfd6e0"/>
+</svg>

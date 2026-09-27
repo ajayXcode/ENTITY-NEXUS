@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 64" role="img" aria-label="Chain lightning">
+<path d="M8 30 L30 30 L38 16 L50 44 L60 24 L70 34 L94 34 L112 32" fill="none"
+          stroke="#3fc6e0" stroke-width="4.4" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="30" cy="30" r="4.5" fill="#cfd6e0"/>
+    <circle cx="70" cy="34" r="4.5" fill="#cfd6e0"/>
+    <circle cx="112" cy="32" r="4.5" fill="#cfd6e0"/>
+</svg>

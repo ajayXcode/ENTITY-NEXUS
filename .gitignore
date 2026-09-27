@@ -1,0 +1,74 @@
+# Dependencies
+node_modules/
+contracts/node_modules/
+
+# Hardhat build artifacts
+contracts/artifacts/
+contracts/cache/
+
+# Environment variables & secrets
+.env
+contracts/.env
+
+# The arbiter's seed preimages for matches it has locked but not yet
+# started. Machine-local state, not source: committing it would publish
+# one server's live commitments and mean nothing to anyone else.
+.arbiter-seeds.json
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+*.log
+
+# local key-recovery leftovers
+.env.backup-before-key-fix
+.env.recovered-key.txt
+
+# ==================================================================
+# Not part of the site
+#
+# None of the below is served, imported or built by server.js. They are
+# excluded rather than deleted so that nothing irreplaceable is lost by a
+# clone - if one of them ever becomes load-bearing, take the line out.
+# ==================================================================
+
+# The previous Next.js application. Nothing at the root imports it, no page
+# links to it, and its .next build output alone is 100MB.
+_legacy-assetforge/
+
+# A vendored third-party WebGL racer (games/hexgl, 20MB). The bridge to it,
+# js/hexgl.js, is not loaded by any page any more.
+games/
+
+# The landing-page script from before the cabinet existed. No page has a
+# <script src="site.js"> tag; its sibling site.css is still loaded by
+# spectate.html for the band tokens, which is why it stays.
+site.js
+
+# Reference material and scratch: design notes and specs, a zipped copy of an
+# upstream repo, generated PDFs, and the original character-sheet image.
+# Kept on disk, kept out of the repo. (assets/models/CREDITS.md is NOT here -
+# that is a licence and it has to ship.)
+1_PRD.md
+2_TRD.md
+3_UI_UX.md
+4_GAMING_ENVIRONMENT.md
+5_AUTH_FLOW.md
+6_IMPLEMENTATION_PLAN.md
+COMBAT_AND_BATTLE.md
+MIRROR_ARENA_RESEARCH_TO_IMPLEMENTATION.md
+deploy.md
+prompt.md
+summary
+summary.md
+*.pdf
+*.zip
+ChatGPT Image Sep 27, 2026, 03_01_55 PM.png
+
+# Agent / editor tooling directories. Not part of the product.
+.claude/
+.codex/
+.agents/
+.cursor/
+.vscode/
+.idea/

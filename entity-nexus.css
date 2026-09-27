@@ -1,0 +1,715 @@
+/* ------------------------------------------------------------------
+   entity-nexus.css - the ENTITY NEXUS landing theme.
+
+   This is the spec's React + Tailwind page translated to plain CSS, on
+   purpose. The site is served by server.js with no bundler, so a Vite
+   build here would change how everything is served - and the game has to
+   keep running exactly as it does. Same layout, same breakpoints, same
+   animations; nothing to install.
+
+   Only index.html loads this file. spectate.html still uses site.css and
+   the cabinet still uses styles.css.
+------------------------------------------------------------------- */
+
+:root {
+  --en-ink: #ffffff;
+  --en-mute: rgba(255, 255, 255, .70);
+  --en-faint: rgba(255, 255, 255, .50);
+  --en-line: rgba(255, 255, 255, .30);
+  --en-line-hi: rgba(255, 255, 255, .60);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; height: 100%; }
+
+body.en-body {
+  background: #000;
+  color: var(--en-ink);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* --- type families -------------------------------------------------
+   PODIUM is the brand face: the wordmark and the one big heading only.
+   Everything else - nav, body, stats, buttons - is Inter. */
+
+.font-podium {
+  font-family: 'FSP DEMO - PODIUM Sharp 4.11', 'Archivo Black', Impact, sans-serif;
+  font-weight: 700;
+}
+.font-inter {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ================= keyframes ================= */
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-up {
+  opacity: 0;
+  animation: fade-up .8s ease-out forwards;
+}
+.animate-fade-up-delay-1 { opacity: 0; animation: fade-up .8s ease-out .2s forwards; }
+.animate-fade-up-delay-2 { opacity: 0; animation: fade-up .8s ease-out .4s forwards; }
+.animate-fade-up-delay-3 { opacity: 0; animation: fade-up .8s ease-out .6s forwards; }
+.animate-fade-up-delay-4 { opacity: 0; animation: fade-up .8s ease-out .8s forwards; }
+
+.animate-fade-in { opacity: 0; animation: fade-in .8s ease-out forwards; }
+.animate-fade-in-delay { opacity: 0; animation: fade-in .8s ease-out .3s forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-fade-up-delay-1,
+  .animate-fade-up-delay-2,
+  .animate-fade-up-delay-3,
+  .animate-fade-up-delay-4,
+  .animate-fade-in,
+  .animate-fade-in-delay {
+    opacity: 1;
+    animation: none;
+    transform: none;
+  }
+}
+
+/* ================= shell ================= */
+
+.vg {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #05060a;
+}
+
+.en-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+/* The clip is bright in places; the copy is white. This keeps the left
+   third readable without flattening the whole frame. */
+.en-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.78) 0%, rgba(0,0,0,.45) 45%, rgba(0,0,0,.25) 100%),
+    linear-gradient(180deg, rgba(0,0,0,.62) 0%, rgba(0,0,0,.10) 38%, rgba(0,0,0,.70) 100%);
+}
+
+.en-stage {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+/* ================= navbar ================= */
+
+.en-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+}
+
+.en-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--en-ink);
+  text-decoration: none;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-size: 1.5rem;          /* text-2xl */
+  line-height: 1;
+}
+
+.en-brand-mark { width: 1em; height: 1em; flex: none; display: block; }
+
+.en-links {
+  display: none;
+  align-items: center;
+  gap: 36px;
+}
+
+.en-links a {
+  color: rgba(255,255,255,.80);
+  text-decoration: none;
+  font-size: .875rem;         /* text-sm */
+  letter-spacing: .1em;       /* tracking-widest */
+  text-transform: uppercase;
+  transition: color .25s ease;
+}
+.en-links a:hover { color: var(--en-ink); }
+
+.en-cta {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;         /* px-6 py-3 */
+  border: 1px solid var(--en-line);
+  color: var(--en-ink);
+  text-decoration: none;
+  font-size: .75rem;          /* text-xs */
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  transition: border-color .25s ease, background-color .25s ease;
+}
+.en-cta:hover { border-color: var(--en-line-hi); background: rgba(255,255,255,.10); }
+.en-cta svg { width: 14px; height: 14px; }
+
+/* The wallet chip. Same visual weight as the CTA so it reads as a sibling,
+   with a status dot that is grey until a wallet answers and green after. */
+.en-wallet {
+  display: none;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 16px;
+  border: 1px solid var(--en-line);
+  background: transparent;
+  color: var(--en-ink);
+  font: inherit;
+  font-size: .6875rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color .25s ease, background-color .25s ease, opacity .25s ease;
+}
+.en-wallet:hover { border-color: var(--en-line-hi); background: rgba(255,255,255,.08); }
+.en-wallet i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.35);
+  flex: none;
+  transition: background-color .25s ease, box-shadow .25s ease;
+}
+.en-wallet.on i { background: #2bd96b; box-shadow: 0 0 10px rgba(43,217,107,.75); }
+.en-wallet.off { opacity: .5; cursor: default; }
+.en-wallet.off i { background: #ff6b6b; }
+
+@media (min-width: 768px) {
+  .en-wallet { display: inline-flex; }
+  .en-top-end .en-wallet { display: none; }
+}
+
+@media (min-width: 1024px) {
+  .en-top-end .en-wallet { display: inline-flex; }
+}
+
+.en-burger {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 6px;                   /* space-y-1.5 */
+  padding: 8px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.en-burger i {
+  display: block;
+  height: 2px;                /* h-0.5 */
+  width: 24px;                /* w-6 */
+  background: #fff;
+}
+.en-burger i:last-child { width: 16px; }   /* w-4 */
+
+/* ================= mobile menu ================= */
+
+.en-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0,0,0,.95);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .5s ease, visibility .5s ease;
+}
+.en-menu.open { opacity: 1; visibility: visible; }
+
+.en-menu-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+}
+
+.en-menu-close {
+  background: none;
+  border: 0;
+  color: #fff;
+  cursor: pointer;
+  padding: 8px;
+  display: inline-flex;
+}
+.en-menu-close svg { width: 24px; height: 24px; }
+
+.en-menu-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px;
+  text-align: center;
+}
+
+/* The stagger is inline on each item (see index.html) exactly as the
+   spec describes: opacity + translateY driven by the open state. */
+.en-menu-link {
+  font-size: 2.25rem;         /* text-4xl */
+  color: #fff;
+  text-decoration: none;
+  text-transform: uppercase;
+  line-height: 1;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .5s ease, transform .5s ease;
+}
+.en-menu.open .en-menu-link { opacity: 1; transform: translateY(0); }
+
+.en-menu-cta {
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: 1px solid var(--en-line);
+  color: #fff;
+  text-decoration: none;
+  font-size: .75rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .5s ease, transform .5s ease, border-color .25s ease;
+}
+.en-menu.open .en-menu-cta { opacity: 1; transform: translateY(0); }
+.en-menu-cta svg { width: 14px; height: 14px; }
+
+/* ================= hero ================= */
+
+.en-hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0 24px 72px;
+}
+
+.en-tagline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--en-mute);
+  font-size: .75rem;          /* text-xs */
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  margin: 0 0 24px;
+}
+.en-tagline svg { width: 16px; height: 16px; flex: none; }
+
+.en-h1 {
+  margin: 0;
+  color: #fff;
+  text-transform: uppercase;
+  line-height: .92;           /* leading-[0.92] */
+  letter-spacing: -.02em;
+  font-size: clamp(2.8rem, 8vw, 7rem);
+}
+.en-h1 span { display: block; }
+
+.en-sub {
+  margin: 24px 0 0;
+  max-width: 28rem;           /* max-w-md */
+  color: var(--en-mute);
+  font-size: .875rem;         /* text-sm */
+  line-height: 1.7;
+}
+.en-sub b { color: #fff; font-weight: 700; }
+
+.en-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.en-btn-dark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #000;
+  color: #fff;
+  border: 0;
+  text-decoration: none;
+  padding: 12px 20px;
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color .25s ease;
+}
+.en-btn-dark:hover { background: #171717; }
+.en-btn-dark svg { width: 16px; height: 16px; transition: transform .25s ease; }
+.en-btn-dark:hover svg { transform: translate(2px, -2px); }
+
+.en-award { display: none; align-items: center; gap: 14px; }
+.en-award svg { width: 32px; height: 32px; color: var(--en-faint); flex: none; }
+.en-award div {
+  color: rgba(255,255,255,.60);
+  font-size: .75rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  line-height: 1.5;
+}
+
+.en-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 32px;
+}
+.en-stats b {
+  display: block;
+  font-size: 1.5rem;          /* text-2xl */
+  font-weight: 700;
+  letter-spacing: -.02em;
+  line-height: 1;
+}
+.en-stats span {
+  display: block;
+  margin-top: 4px;
+  color: var(--en-faint);
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+/* ================= breakpoints: sm 640 ================= */
+
+@media (min-width: 640px) {
+  .en-nav { padding-left: 40px; padding-right: 40px; }   /* sm:px-10 */
+  .en-hero { padding-left: 40px; padding-right: 40px; }
+  .en-menu-head { padding-left: 40px; padding-right: 40px; }
+
+  .en-brand { font-size: 1.875rem; }                     /* sm:text-3xl */
+  .en-tagline { font-size: .875rem; }
+  .en-sub { font-size: 1rem; }
+
+  .en-btn-dark { padding: 16px 28px; font-size: .75rem; }
+  .en-award { display: flex; }
+  .en-menu-link { font-size: 3rem; }
+
+  .en-actions { gap: 24px; }
+  .en-stats { gap: 48px; margin-top: 40px; }
+  .en-stats b { font-size: 2.25rem; }
+  .en-stats span { font-size: .75rem; }
+}
+
+/* ================= breakpoints: md 768 ================= */
+
+@media (min-width: 768px) {
+  .en-links { display: flex; }
+  .en-cta { display: inline-flex; }
+  .en-burger { display: none; }
+  .en-menu { display: none; }        /* the overlay is a below-md affordance */
+}
+
+/* ================= breakpoints: lg 1024 ================= */
+
+@media (min-width: 1024px) {
+  .en-nav { padding-left: 64px; padding-right: 64px; padding-top: 28px; padding-bottom: 28px; }
+  .en-hero { padding-left: 64px; padding-right: 64px; }
+  .en-tagline { margin-bottom: 32px; }
+  .en-sub { margin-top: 32px; }
+  .en-actions { margin-top: 40px; }
+  .en-stats { gap: 64px; margin-top: 56px; }
+  .en-stats b { font-size: 3rem; }
+}
+
+/* Very short viewports (landscape phones): the hero must still fit. */
+@media (max-height: 560px) {
+  .en-hero { padding-bottom: 40px; }
+  .en-h1 { font-size: clamp(2rem, 6vh, 3.2rem); }
+  .en-stats { margin-top: 24px; }
+}
+
+/* ==================================================================
+   BANDS BELOW THE HERO
+
+   The hero is the whole first screen. Everything after it exists so the
+   nav has somewhere real to go, and so the champions are visible before
+   anyone reaches the cabinet. Same palette, same type, wide gutters.
+   ================================================================== */
+
+.en-band {
+  position: relative;
+  padding: 88px 0 96px;
+  background: #05060a;
+  border-top: 1px solid rgba(255,255,255,.07);
+}
+.en-band-alt { background: #08090d; }
+
+.en-wrap {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.en-band-head { max-width: 62ch; margin-bottom: 44px; }
+
+.en-eyebrow {
+  display: inline-block;
+  margin-bottom: 18px;
+  font-size: .6875rem;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.45);
+}
+
+.en-band-head h2 {
+  margin: 0;
+  font-size: clamp(1.9rem, 4.2vw, 3.25rem);
+  line-height: 1.02;
+  letter-spacing: -.01em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.en-band-head h2 em { font-style: normal; color: rgba(255,255,255,.45); }
+
+.en-band-note {
+  margin: 20px 0 0;
+  font-size: .875rem;
+  line-height: 1.75;
+  color: rgba(255,255,255,.60);
+}
+.en-band-note code {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: .82em;
+  color: rgba(255,255,255,.82);
+}
+
+/* ---- the roster ---- */
+
+.en-roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(272px, 1fr));
+  gap: 18px;
+}
+
+/* the way through to the full champion index */
+.en-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 40px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,.30);
+  color: #fff;
+  text-decoration: none;
+  font-size: .75rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  transition: border-color .25s ease;
+}
+.en-more:hover { border-bottom-color: #fff; }
+.en-more svg { width: 15px; height: 15px; transition: transform .25s ease; }
+.en-more:hover svg { transform: translate(2px, -2px); }
+
+/* ---- the three destinations ---- */
+
+.en-dest {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.en-dest-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 30px 26px;
+  border: 1px solid rgba(255,255,255,.10);
+  color: #fff;
+  text-decoration: none;
+  transition: border-color .25s ease, background-color .25s ease, transform .25s ease;
+}
+.en-dest-card:hover {
+  border-color: rgba(255,255,255,.32);
+  background: rgba(255,255,255,.03);
+  transform: translateY(-2px);
+}
+
+.en-dest-k {
+  font-size: .625rem;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.42);
+}
+.en-dest-card h3 {
+  margin: 4px 0 0;
+  font-size: 1.375rem;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+}
+.en-dest-card p {
+  margin: 0;
+  font-size: .8125rem;
+  line-height: 1.7;
+  color: rgba(255,255,255,.58);
+}
+.en-dest-go {
+  margin-top: auto;
+  padding-top: 18px;
+  font-size: .6875rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.85);
+}
+.en-dest-go b { transition: transform .25s ease; display: inline-block; }
+.en-dest-card:hover .en-dest-go b { transform: translateX(3px); }
+
+/* ---- footer ---- */
+
+.en-foot {
+  background: #05060a;
+  border-top: 1px solid rgba(255,255,255,.07);
+  padding: 40px 0;
+}
+.en-foot-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.en-foot-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.125rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.en-foot-brand .en-brand-mark { width: 18px; height: 18px; }
+.en-foot-links { display: flex; flex-wrap: wrap; gap: 22px; }
+.en-foot-links a {
+  color: rgba(255,255,255,.60);
+  text-decoration: none;
+  font-size: .75rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  transition: color .25s ease;
+}
+.en-foot-links a:hover { color: #fff; }
+.en-foot-note {
+  font-size: .6875rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.35);
+}
+
+/* ==================================================================
+   SECONDARY PAGES (the champion index)
+
+   The hero belongs to the landing page alone. These are the one bar and
+   two bands the other pages need, in the same language.
+   ================================================================== */
+
+.en-top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(5, 6, 10, .92);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.en-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+/* The champion index puts the wallet chip beside its CTA. Same chip as the
+   landing page - see wallet.css - so both report the same wallet. */
+.en-top-end { display: flex; align-items: center; gap: 12px; }
+
+.en-top-links { display: none; gap: 26px; }
+.en-top-links a {
+  color: rgba(255,255,255,.62);
+  text-decoration: none;
+  font-size: .75rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  transition: color .2s ease;
+}
+.en-top-links a:hover, .en-top-links a.on { color: #fff; }
+
+.en-hero-band { padding-top: 72px; }
+.en-cta-band { text-align: center; }
+.en-cta-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+}
+.en-cta-row h2 {
+  margin: 0;
+  font-size: clamp(1.5rem, 3.4vw, 2.5rem);
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: -.01em;
+}
+
+@media (min-width: 640px) {
+  .en-wrap { padding: 0 40px; }
+}
+@media (min-width: 768px) {
+  .en-top-links { display: flex; }
+}
+@media (max-width: 767px) {
+  .en-top .en-cta { display: none; }
+  .en-top-links { display: none; }
+}
+@media (min-width: 1024px) {
+  .en-band { padding: 120px 0 128px; }
+  .en-wrap { padding: 0 64px; }
+  .en-band-head { margin-bottom: 60px; }
+  .en-roster-grid { gap: 22px; }
+}

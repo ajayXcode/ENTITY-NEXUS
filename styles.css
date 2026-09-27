@@ -1,0 +1,1321 @@
+/* ------------------------------------------------------------------
+   Arcade cabinet, not a dashboard.
+   Solid fills, hard 4-6px borders, offset shadows with zero blur,
+   no translucent frosted panels anywhere. Everything sized to read
+   from the back of a room.
+------------------------------------------------------------------- */
+
+:root {
+  --bg: #05060a;
+  --ink: #05060a;
+  --p1: #ff3b6b;
+  --p1d: #8c1030;
+  --p2: #40dcff;
+  --p2d: #0b6a85;
+  --gold: #ffd24a;
+  --goldd: #8a6b0f;
+  --line: #ffffff;
+  --dim: #7c8496;
+  --mono: Consolas, "SF Mono", Menlo, "DejaVu Sans Mono", "Courier New", monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: #fff;
+  font-family: var(--mono);
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+#stage-wrap {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse at 50% 40%, #12151f 0%, #05060a 70%);
+}
+
+#stage {
+  position: relative;
+  width: 1024px;
+  height: 576px;
+  flex: none;
+  transform-origin: center center;
+  border: 6px solid #fff;
+  box-shadow: 0 0 0 10px #05060a, 0 24px 0 10px #000;
+  background: #000;
+}
+
+#arena { display: block; width: 1024px; height: 576px; image-rendering: pixelated; }
+
+/* The 3D canvas sits in the same slot as the 2D one. Exactly one of the two
+   is visible at a time (Render3D._show toggles .hidden), so the HUD, the
+   screens and the scanlines all sit over whichever is showing and need no
+   changes of their own. No smoothing override here - unlike the pixel-art
+   canvas, this one wants the browser's filtering. */
+#arena3d { display: block; width: 1024px; height: 576px; }
+
+/* Scanlines are a CRT affectation that belongs to the sprite look; over a
+   lit 3D scene they just read as banding. */
+body.mode-3d #scanlines { opacity: 0.25; }
+
+#btn-3d { margin-top: 14px; font-size: 13px; padding: 9px 18px; }
+
+#scanlines {
+  position: absolute; inset: 0; pointer-events: none; z-index: 60;
+  background: repeating-linear-gradient(to bottom,
+    rgba(0,0,0,0.22) 0px, rgba(0,0,0,0.22) 1px, transparent 1px, transparent 3px);
+}
+
+.hidden { display: none !important; }
+
+/* ---------------- buttons ---------------- */
+
+.btn {
+  font-family: var(--mono);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  font-size: 15px;
+  padding: 13px 22px;
+  color: var(--ink);
+  background: var(--gold);
+  border: 4px solid var(--ink);
+  box-shadow: 0 6px 0 var(--goldd), 0 6px 0 4px var(--ink);
+  cursor: pointer;
+  transition: transform .04s linear, box-shadow .04s linear, filter .1s;
+}
+.btn:hover { filter: brightness(1.12); }
+.btn:active { transform: translateY(6px); box-shadow: 0 0 0 var(--goldd), 0 0 0 4px var(--ink); }
+.btn.big { font-size: 26px; padding: 20px 46px; letter-spacing: 0.14em; }
+.btn.ghost { background: #1a1f2c; color: #fff; box-shadow: 0 6px 0 #0a0d14, 0 6px 0 4px var(--ink); }
+.btn.ghost:active { box-shadow: 0 0 0 #0a0d14, 0 0 0 4px var(--ink); }
+.btn.gold { background: var(--gold); }
+.btn.lock { background: #fff; }
+.btn.lock.done { background: #2bd96b; }
+.btn:disabled { opacity: .45; cursor: default; filter: none; }
+
+/* ---------------- screens ---------------- */
+
+.screen {
+  position: absolute; inset: 0; z-index: 40;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #05060a;
+  padding: 18px 24px;
+}
+.screen.active { display: flex; }
+#screen-reveal, #screen-winner, #screen-mint { background: rgba(5, 6, 10, 0.94); }
+
+/* ---------------- title ---------------- */
+
+/* Transparent, so the live arena shows through with both fighters playing
+   their idle cycles behind the text (see attractPose in game.js).
+
+   Two scrims instead of a flat fill: a soft ellipse that darkens only the
+   middle, where the text sits, and a top/bottom vignette to seat the whole
+   thing. The ellipse is narrower than the gap between the two fighters, so
+   it never washes over either of them. */
+#screen-title {
+  background:
+    radial-gradient(ellipse 46% 62% at 50% 46%,
+      rgba(5,6,10,0.95) 0%, rgba(5,6,10,0.88) 42%,
+      rgba(5,6,10,0.45) 72%, rgba(5,6,10,0) 100%),
+    linear-gradient(to bottom,
+      rgba(5,6,10,0.72) 0%, rgba(5,6,10,0.10) 26%,
+      rgba(5,6,10,0.10) 62%, rgba(5,6,10,0.80) 100%);
+}
+
+.title-stack { text-align: center; }
+
+/* Entrance: each line arrives a beat after the one above, walking the eye
+   down the screen in reading order instead of dropping everything at once. */
+.title-stack > * { animation: riseIn .42s cubic-bezier(.16,.9,.3,1) both; }
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.title-stack > *:nth-child(1) { animation-delay: .10s }
+.title-stack > *:nth-child(2) { animation-delay: .20s }
+.title-stack > *:nth-child(3) { animation-delay: .32s }
+.title-stack > *:nth-child(4) { animation-delay: .44s }
+.title-stack > *:nth-child(5) { animation-delay: .56s }
+.kicker {
+  font-size: 13px; letter-spacing: 0.5em; color: var(--gold);
+  border: 3px solid var(--gold); display: inline-block; padding: 6px 14px; margin-bottom: 20px;
+}
+/* The two offset shadows drift on slightly different paths, so the logo
+   never settles into a flat graphic - it breathes the way a mis-converged
+   CRT does. Slow and only a couple of pixels: from the back of a room it
+   should register as depth, not as a wobble.
+
+   Declared in the same shorthand as the entrance because `.title-stack > *`
+   is the more specific selector - a lone titleDrift here would simply be
+   replaced by it and never run. */
+h1 {
+  font-size: 62px; line-height: 0.98; letter-spacing: 0.02em;
+  text-shadow: 6px 6px 0 var(--p1), 12px 12px 0 var(--p2);
+  margin-bottom: 22px;
+  animation:
+    riseIn .42s cubic-bezier(.16,.9,.3,1) .20s both,
+    titleDrift 4.5s ease-in-out .7s infinite alternate;
+}
+@keyframes titleDrift {
+  from { text-shadow: 5px 6px 0 var(--p1), 13px 11px 0 var(--p2); }
+  to   { text-shadow: 8px 5px 0 var(--p1), 10px 14px 0 var(--p2); }
+}
+h1 em { font-style: normal; color: var(--gold); }
+.tagline { font-size: 15px; color: var(--dim); line-height: 1.9; margin-bottom: 30px; text-transform: none; }
+.hint { margin-top: 20px; font-size: 11px; color: #4f5768; letter-spacing: 0.18em; }
+
+/* Attract mode: a cabinet with nobody at it asks to be played, and the ask
+   is always the coin slot. Pulses brightness and the glow rather than
+   `transform`, because an animated transform overrides a hovered one and the
+   button would stop responding to the pointer. */
+#btn-begin {
+  animation:
+    riseIn .42s cubic-bezier(.16,.9,.3,1) .44s both,
+    coinPulse 1.6s ease-in-out 1.1s infinite;
+}
+@keyframes coinPulse {
+  0%, 100% { filter: brightness(1);
+             box-shadow: 0 6px 0 var(--goldd), 0 6px 0 4px var(--ink); }
+  50%      { filter: brightness(1.2);
+             box-shadow: 0 6px 0 var(--goldd), 0 6px 0 4px var(--ink),
+                         0 0 28px 7px rgba(255,210,74,0.32); }
+}
+
+/* ---------------- prompt entry ---------------- */
+
+.prompt-head {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px; color: var(--dim); letter-spacing: 0.22em; margin-bottom: 10px;
+}
+.prompt-head .muted { color: #414857; }
+#prompt-clock {
+  border: 4px solid #fff; padding: 2px 16px; background: #000;
+  font-size: 30px; font-weight: 700; color: #fff; letter-spacing: 0.06em;
+}
+#prompt-clock.warn { color: var(--gold); border-color: var(--gold); }
+#prompt-clock.crit { color: var(--p1); border-color: var(--p1); animation: pulse .45s steps(2) infinite; }
+@keyframes pulse { 50% { opacity: .35 } }
+
+.prompt-grid { display: flex; gap: 12px; width: 100%; flex: 1; min-height: 0; }
+.vs-col { display: flex; align-items: center; font-size: 26px; color: #39404f; font-weight: 700; }
+
+.pbox {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px;
+  background: #0b0e16; border: 4px solid #232a3a; padding: 12px;
+}
+.pbox.p1 { border-color: var(--p1d); }
+.pbox.p2 { border-color: var(--p2d); }
+.pbox.locked { border-color: #2bd96b; }
+.pbox header {
+  display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; letter-spacing: 0.18em;
+}
+.pbox.p2 header { justify-content: flex-end; }
+.dot { width: 13px; height: 13px; display: inline-block; }
+.p1 .dot { background: var(--p1); }
+.p2 .dot { background: var(--p2); }
+
+textarea {
+  font-family: var(--mono); font-size: 14px; line-height: 1.6;
+  background: #000; color: #fff; border: 3px solid #2a3143;
+  padding: 10px; resize: none; height: 132px; text-transform: none; letter-spacing: 0.02em;
+  outline: none;
+}
+textarea:focus { border-color: #fff; }
+.p1 textarea:focus { border-color: var(--p1); }
+.p2 textarea:focus { border-color: var(--p2); }
+textarea::placeholder { color: #3c4353; }
+
+.wc { font-size: 10px; color: #4f5768; letter-spacing: 0.14em; text-align: right; }
+.wc.warn { color: var(--gold); }
+.wc.full { color: var(--p1); }
+
+.presets { display: flex; gap: 5px; flex-wrap: wrap; }
+.preset {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+  background: #1b2130; color: #9aa3b5; border: 2px solid #2e3648;
+  padding: 5px 8px; cursor: pointer;
+}
+.preset:hover { background: #262e40; color: #fff; border-color: #55607a; }
+
+.readout { flex: 1; display: flex; flex-direction: column; gap: 7px; min-height: 0; }
+.arch { font-size: 17px; font-weight: 700; color: var(--gold); letter-spacing: 0.12em; }
+
+/* segmented power meters */
+.bars { display: flex; flex-direction: column; gap: 5px; }
+.bar-row { display: flex; align-items: center; gap: 7px; }
+.bar-row label { font-size: 10px; width: 34px; color: var(--dim); letter-spacing: 0.1em; }
+.bar-track { display: flex; gap: 2px; flex: 1; }
+/* Scoped to the meter on purpose: the setup screens use .seg for their
+   segmented pickers too, and an unscoped rule here squashed those to 13px
+   and painted a grey track across the leftover width. */
+.bar-track .seg { flex: 1; height: 13px; background: #191f2c; border: 1px solid #000; }
+.bar-track .seg.on { background: var(--gold); }
+.bar-row.atk .bar-track .seg.on { background: var(--p1); }
+.bar-row.def .bar-track .seg.on { background: var(--p2); }
+.bar-row.spd .bar-track .seg.on { background: var(--gold); }
+.bar-row b { font-size: 11px; width: 26px; text-align: right; color: #fff; }
+.bars.wide .bar-track .seg { height: 20px; }
+.bars.wide .bar-row label { width: 52px; font-size: 13px; }
+.bars.wide .bar-row b { width: 38px; font-size: 15px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 4px; align-content: flex-start; overflow: hidden; max-height: 32px; }
+.chip {
+  font-size: 10px; padding: 3px 7px; border: 2px solid; letter-spacing: 0.06em;
+  animation: chipIn .18s ease-out;
+}
+.chip.aggression { color: var(--p1); border-color: var(--p1); }
+.chip.defense { color: var(--p2); border-color: var(--p2); }
+.chip.speed { color: var(--gold); border-color: var(--gold); }
+.chip.compound { color: #fff; border-color: #fff; }
+.chip.improv { color: var(--dim); border-color: #39404f; }
+/* What Gemini reported reading in the prompt, rather than a lexicon hit -
+   given its own colour so the two sources are never confused on screen. */
+.chip.ai { color: #9ad8ff; border-color: #9ad8ff; }
+@keyframes chipIn { from { transform: translateY(-6px) scale(.85); opacity: 0 } }
+
+/* ---------------- analyzing ---------------- */
+
+.analyze-stack { text-align: center; width: 560px; }
+.spinner {
+  width: 62px; height: 62px; margin: 0 auto 22px;
+  border: 8px solid #1c2230; border-top-color: var(--gold); border-right-color: var(--p1);
+  animation: spin .7s steps(8) infinite;
+}
+@keyframes spin { to { transform: rotate(360deg) } }
+#screen-analyze h2 { font-size: 27px; letter-spacing: 0.22em; margin-bottom: 18px; }
+#analyze-log {
+  text-align: left; font-size: 12px; color: #5be07a; background: #000;
+  border: 3px solid #1c2230; padding: 12px; height: 132px; overflow: hidden;
+}
+#analyze-log div { margin-bottom: 4px; }
+#analyze-log .ok { color: var(--gold); }
+
+/* ---------------- reveal ---------------- */
+
+.reveal-grid { display: flex; align-items: stretch; gap: 16px; width: 100%; }
+.card {
+  flex: 1; background: #0b0e16; border: 5px solid; padding: 18px;
+  display: flex; flex-direction: column; gap: 10px;
+  animation: slam .32s cubic-bezier(.2,1.5,.4,1) both;
+}
+.card.p1 { border-color: var(--p1); animation-delay: .05s; }
+.card.p2 { border-color: var(--p2); animation-delay: .22s; }
+@keyframes slam { from { transform: scale(1.5); opacity: 0 } }
+.card h3 { font-size: 14px; color: var(--dim); letter-spacing: 0.2em; }
+.card .big-arch { font-size: 30px; color: var(--gold); line-height: 1.1; }
+.card .tag { font-size: 11px; color: var(--dim); text-transform: none; letter-spacing: 0.02em; }
+.card blockquote {
+  font-size: 12px; color: #fff; background: #000; border-left: 5px solid #333c50;
+  padding: 9px 11px; text-transform: none; line-height: 1.5; max-height: 92px; overflow-y: auto;
+}
+.reveal-vs { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+.reveal-vs span { font-size: 40px; font-weight: 700; color: #fff; text-shadow: 4px 4px 0 var(--p1), -4px -4px 0 var(--p2); }
+.reveal-vs em {
+  font-style: normal; font-size: 19px; color: var(--gold); opacity: 0;
+  border: 3px solid var(--gold); padding: 5px 12px;
+}
+.reveal-vs em.go { animation: slam .3s cubic-bezier(.2,1.5,.4,1) both; opacity: 1; }
+
+/* ---------------- fight HUD ---------------- */
+
+#hud { position: absolute; inset: 0; z-index: 30; pointer-events: none; }
+#hud-top { display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px 0; }
+.hp-side { flex: 1; min-width: 0; }
+.hp-name { display: flex; align-items: baseline; gap: 9px; margin-bottom: 5px; font-size: 13px; }
+.hp-side.p2 .hp-name { justify-content: flex-end; }
+.hp-name b { font-size: 15px; letter-spacing: 0.1em; }
+.hp-side.p1 .hp-name b { color: var(--p1); }
+.hp-side.p2 .hp-name b { color: var(--p2); }
+.hp-track {
+  height: 32px; background: #3a0d1a; border: 4px solid #fff; position: relative; overflow: hidden;
+}
+/* Chip damage: a white ghost bar that lags a beat behind the real one, so
+   the size of a hit is legible after the hit itself is over. */
+.hp-chip, .hp-fill { position: absolute; top: 0; bottom: 0; right: 0; width: 100%; }
+.hp-track.rtl .hp-chip, .hp-track.rtl .hp-fill { right: auto; left: 0; }
+.hp-chip { background: #ffffff; }
+.hp-fill { background: var(--p1); }
+.hp-side.p2 .hp-fill { background: var(--p2); }
+.hp-track.low .hp-fill { animation: hpLow .38s steps(2) infinite; }
+@keyframes hpLow { 50% { filter: brightness(2.2) } }
+#hud-timer {
+  flex: none; width: 104px; height: 66px; background: #000; border: 5px solid #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; font-weight: 700;
+}
+#hud-timer.crit { color: var(--p1); border-color: var(--p1); }
+
+#hud-prompts { display: flex; gap: 10px; padding: 8px 16px; }
+.hud-prompt {
+  flex: 1; font-size: 11px; line-height: 1.45; text-transform: none; letter-spacing: 0.01em;
+  background: #05060a; border-left: 5px solid var(--p1); padding: 6px 9px; color: #c9d0dd;
+  max-height: 46px; overflow: hidden;
+}
+.hud-prompt.p2 { border-left: none; border-right: 5px solid var(--p2); text-align: right; }
+
+#announce {
+  position: absolute; top: 44%; left: 0; right: 0; text-align: center;
+  font-size: 66px; font-weight: 700; letter-spacing: 0.1em; opacity: 0;
+  text-shadow: 5px 5px 0 var(--p1), -5px -5px 0 var(--p2);
+}
+#announce.show { animation: announce 1.25s ease-out forwards; }
+@keyframes announce {
+  0% { opacity: 0; transform: scale(2.4) }
+  18% { opacity: 1; transform: scale(1) }
+  72% { opacity: 1; transform: scale(1) }
+  100% { opacity: 0; transform: scale(1.15) }
+}
+
+#seed-tag {
+  position: absolute; bottom: 8px; right: 12px; font-size: 10px; color: #48505f; letter-spacing: 0.15em;
+}
+
+body.sudden-death #stage { box-shadow: 0 0 0 10px #4a0a1c, 0 24px 0 10px #000; border-color: var(--p1); }
+body.sudden-death #hud-timer { color: var(--p1); border-color: var(--p1); }
+
+/* ---------------- winner ---------------- */
+
+.win-stack { text-align: center; width: 720px; }
+.win-kicker { font-size: 20px; color: var(--p1); letter-spacing: 0.4em; margin-bottom: 6px; }
+#win-title {
+  font-size: 54px; letter-spacing: 0.04em; margin-bottom: 8px;
+  text-shadow: 5px 5px 0 var(--p1), 10px 10px 0 var(--p2);
+  animation: slam .35s cubic-bezier(.2,1.5,.4,1) both;
+}
+.win-arch { font-size: 25px; color: var(--gold); letter-spacing: 0.15em; margin-bottom: 14px; }
+#win-prompt {
+  font-size: 14px; color: #fff; background: #000; border: 3px solid #2a3143;
+  padding: 13px 16px; text-transform: none; line-height: 1.55; margin-bottom: 16px;
+  max-height: 120px; overflow-y: auto; text-align: left;
+}
+.win-actions { display: flex; gap: 12px; justify-content: center; margin-top: 20px; }
+
+/* ---------------- mint ---------------- */
+
+.mint-stack { width: 640px; text-align: center; }
+#screen-mint h2 { font-size: 30px; letter-spacing: 0.2em; margin-bottom: 18px; }
+#mint-log {
+  text-align: left; font-size: 12px; color: #5be07a; background: #000;
+  border: 3px solid #1c2230; padding: 12px; min-height: 108px; margin-bottom: 16px;
+}
+#mint-log div { margin-bottom: 5px; }
+.mint-badge {
+  font-size: 22px; color: var(--ink); background: var(--gold); border: 4px solid var(--ink);
+  padding: 12px; letter-spacing: 0.12em; margin-bottom: 14px;
+  box-shadow: 0 6px 0 var(--goldd), 0 6px 0 4px var(--ink);
+}
+.mint-row { display: flex; gap: 10px; font-size: 12px; margin-bottom: 7px; align-items: center; }
+.mint-row span { color: var(--dim); width: 54px; text-align: left; }
+.mint-row code { color: #fff; font-family: var(--mono); text-transform: none; word-break: break-all; font-size: 11px; }
+.sim-chip {
+  display: inline-block; font-size: 10px; color: var(--gold); border: 2px solid var(--gold);
+  padding: 5px 9px; letter-spacing: 0.12em; margin: 12px 0 18px;
+}
+
+/* ---------------- mute ---------------- */
+
+#mute {
+  position: fixed; bottom: 14px; left: 14px; z-index: 100;
+  width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+  background: #12151f; border: 3px solid #2a3143; color: #fff; cursor: pointer; font-size: 17px;
+}
+#mute.off { color: #4a5263; border-color: #1a1f2c; }
+
+/* ---------------- fatal render error ---------------- */
+
+#fatal {
+  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  z-index: 999; width: 560px; max-width: 92vw;
+  background: #1a0710; border: 5px solid var(--p1);
+  box-shadow: 0 10px 0 5px #000;
+  padding: 22px 26px; color: #fff; text-align: left;
+}
+#fatal b { display: block; font-size: 20px; color: var(--p1); letter-spacing: 0.16em; margin-bottom: 12px; }
+#fatal p { font-size: 12px; line-height: 1.7; text-transform: none; color: #e6e9ef; margin-bottom: 10px; word-break: break-word; }
+#fatal .hint { color: var(--gold); }
+
+/* ==================================================================
+   GAME SELECT + PEN FIGHT
+================================================================== */
+
+#pen3d { display: block; width: 1024px; height: 576px; }
+
+/* Scanlines over a lamp-lit desk read as a dirty monitor, not as a CRT.
+   Nearly off, but not off - the cabinet frame should survive. */
+body.mode-pen #scanlines { opacity: 0.16; }
+
+/* Two cabinets side by side on the title screen. The whole selection is one
+   row because two games is two games - the moment this needs to scroll it
+   should become a proper grid, and until then a row reads instantly. */
+.game-select {
+  display: flex; gap: 16px; justify-content: center; margin-bottom: 26px;
+}
+
+.game-card {
+  width: 206px; padding: 12px 12px 14px;
+  background: #0b0e16;
+  border: 3px solid #293143;
+  color: var(--dim);
+  font-family: var(--mono); text-transform: uppercase; text-align: center;
+  cursor: pointer;
+  transition: border-color .12s, color .12s, transform .08s, box-shadow .12s;
+}
+.game-card:hover { border-color: #46516d; color: #c8cfdd; transform: translateY(-2px); }
+.game-card.on {
+  border-color: var(--gold); color: #fff;
+  box-shadow: 0 0 0 3px var(--ink), 0 0 30px rgba(255, 210, 74, 0.22);
+}
+.game-card.unavailable { opacity: 0.35; cursor: not-allowed; }
+.game-card.unavailable:hover { transform: none; border-color: #293143; color: var(--dim); }
+
+.gc-name { font-size: 15px; font-weight: 700; letter-spacing: 0.10em; }
+.gc-name em { font-style: normal; color: var(--gold); }
+.gc-sub { font-size: 9px; letter-spacing: 0.16em; margin-top: 5px; color: #5b6478; }
+.game-card.on .gc-sub { color: #8b93a6; }
+
+/* The art panel is two coloured shapes on a floor line - a silhouette of
+   what the mode actually is. Drawn in CSS because two <i> elements beat
+   shipping two more images for a menu. */
+.gc-art {
+  position: relative; height: 56px; margin-bottom: 10px;
+  background: linear-gradient(to bottom, #060810 60%, #10141f 100%);
+  border: 2px solid #1b2130; overflow: hidden;
+}
+.gc-art::after {                       /* the floor / desk line */
+  content: ''; position: absolute; left: 8%; right: 8%; bottom: 13px; height: 2px;
+  background: #2b3448;
+}
+.gc-art i { position: absolute; display: block; }
+
+/* two fighters squaring up */
+.gc-fighter i { width: 8px; height: 26px; bottom: 15px; border-radius: 2px; }
+.gc-fighter i:nth-child(1) { left: 32%; background: var(--p1); }
+.gc-fighter i:nth-child(2) { right: 32%; background: var(--p2); }
+.game-card.on .gc-fighter i:nth-child(1) { box-shadow: 0 0 12px var(--p1); }
+.game-card.on .gc-fighter i:nth-child(2) { box-shadow: 0 0 12px var(--p2); }
+
+/* two pens crossed on a desk */
+.gc-pen i { width: 52px; height: 6px; bottom: 16px; border-radius: 3px; }
+.gc-pen i:nth-child(1) {
+  left: 16%; background: linear-gradient(to right, #dfe4ea 0 12%, var(--p1) 12% 100%);
+  transform: rotate(-13deg);
+}
+.gc-pen i:nth-child(2) {
+  right: 16%; background: linear-gradient(to left, #dfe4ea 0 12%, var(--p2) 12% 100%);
+  transform: rotate(14deg);
+}
+.game-card.on .gc-pen i:nth-child(1) { box-shadow: 0 0 12px var(--p1); }
+.game-card.on .gc-pen i:nth-child(2) { box-shadow: 0 0 12px var(--p2); }
+
+/* The title stack gained two children (the select, and the 3D toggle moved
+   down a slot), so the entrance cascade needs two more beats or the last
+   rows would arrive with no delay at all. */
+.title-stack > *:nth-child(6) { animation-delay: .66s }
+.title-stack > *:nth-child(7) { animation-delay: .76s }
+
+/* #btn-begin carries TWO animations (the entrance and the coin pulse), so
+   its delay has to be a two-value list - a single value would be applied to
+   both and the pulse would start half a second early. */
+#btn-begin { animation-delay: .56s, 1.1s; }
+
+/* Which game the prompt box is currently feeding. */
+#mode-tag { color: var(--gold); letter-spacing: 0.20em; }
+
+/* ==================================================================
+   HEX RACER - practice mode
+   ================================================================== */
+
+/* Card art: a ship on a ribbon of track, running away from the viewer.
+   Two <i> like the other two cards, no image. */
+.gc-hex::after { bottom: 10px; left: 30%; right: 30%; background: #2b3448; }
+.gc-hex i:nth-child(1) {                      /* the track, in perspective */
+  left: 50%; bottom: 8px; width: 0; height: 0;
+  transform: translateX(-50%);
+  border-left: 34px solid transparent;
+  border-right: 34px solid transparent;
+  border-bottom: 34px solid #141a28;
+}
+.gc-hex i:nth-child(2) {                      /* the ship */
+  left: 50%; bottom: 12px; width: 0; height: 0;
+  transform: translateX(-50%);
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-bottom: 13px solid var(--p2);
+}
+.game-card.on .gc-hex i:nth-child(1) { border-bottom-color: #1b2740; }
+.game-card.on .gc-hex i:nth-child(2) { filter: drop-shadow(0 0 9px var(--p2)); }
+
+/* ---------------- setup screen ---------------- */
+
+/* Tighter than the other setup screens because this one now carries a
+   prompt box as well: the stage is a fixed 1024x576 and the whole screen -
+   heading, prompt, readout, both pickers and the buttons - has to sit
+   inside it without a scrollbar. */
+.hex-stack { text-align: center; width: 100%; max-width: 900px; }
+.hex-stack .kicker { margin-bottom: 10px; }
+.hex-stack h2 { font-size: 32px; letter-spacing: 0.08em; margin: 0; }
+.hex-stack h2 em { font-style: normal; color: var(--gold); }
+.hex-tag {
+  font-size: 12px; color: var(--dim); line-height: 1.6;
+  margin: 8px 0 16px; text-transform: none;
+}
+
+/* Prompt on the left, everything the prompt produces on the right - so a
+   rewrite and its consequences are never more than one glance apart. */
+.hex-cols { display: flex; gap: 14px; text-align: left; align-items: stretch; }
+.hex-box { flex: 1.15; min-width: 0; border-color: var(--goldd); }
+.hex-box header { font-size: 13px; }
+.hex-box .dot { background: var(--gold); }
+.hex-box textarea { height: 104px; font-size: 13px; }
+.hex-box textarea:focus { border-color: var(--gold); }
+
+.hex-side { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.hex-side .readout { flex: none; gap: 6px; }
+.hex-side .arch { font-size: 15px; }
+.hex-side .chips { max-height: 24px; }
+
+/* The stats restated as ship numbers. Monospaced and evenly split so the
+   values move in place when the prompt changes instead of reflowing. */
+.hex-build {
+  display: flex; gap: 6px; border-top: 2px solid #1c2230; padding-top: 9px;
+}
+.hex-build span {
+  flex: 1; font-size: 9px; letter-spacing: 0.16em; color: #5b6478;
+}
+.hex-build b {
+  display: block; margin-top: 3px; font-size: 14px; color: #fff; letter-spacing: 0.04em;
+}
+
+.hex-opts { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
+.hex-opt { display: flex; flex-direction: column; gap: 6px; }
+.hex-opt > span { font-size: 10px; letter-spacing: 0.24em; color: #5b6478; }
+
+/* Segmented picker. Same visual language as .game-card so the two screens
+   read as one cabinet, just smaller. */
+.seg { display: flex; gap: 6px; }
+.seg button {
+  font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.14em;
+  font-size: 10px; padding: 9px 14px; cursor: pointer;
+  background: #0b0e16; border: 2px solid #293143; color: var(--dim);
+  transition: border-color .12s, color .12s, transform .08s;
+}
+.seg button:hover { border-color: #46516d; color: #c8cfdd; transform: translateY(-1px); }
+.seg button.on {
+  border-color: var(--gold); color: #fff;
+  box-shadow: 0 0 18px rgba(255, 210, 74, 0.18);
+}
+
+.hex-target-read {
+  font-size: 10px; letter-spacing: 0.24em; color: #5b6478;
+}
+.hex-target-read b {
+  color: var(--gold); font-size: 15px; letter-spacing: 0.08em;
+  display: inline-block; margin-left: 8px;
+}
+
+.hex-actions { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 16px; }
+#btn-hex-go { font-size: 17px; padding: 12px 30px; }
+/* Held while Gemini reads the prompt. The label changes too, so the wait is
+   explained rather than just slow. */
+#btn-hex-go.busy { opacity: 0.65; pointer-events: none; }
+#btn-hex-back { font-size: 13px; padding: 9px 18px; }
+
+/* ---------------- the running game ---------------- */
+
+/* Outside #stage on purpose. #stage is a fixed 1024x576 letterbox that gets
+   transform: scale()d to fit the window - correct for a pixel-art fighter,
+   wrong for a 3D racer, which should render at the window's real resolution
+   rather than be scaled up from a small buffer. */
+#hexgl-host {
+  position: fixed; inset: 0; z-index: 200;
+  background: #05060a;
+}
+#hexgl-host.hidden { display: none; }
+#hexgl-frame { display: block; width: 100%; height: 100%; border: 0; }
+
+/* The cabinet furniture belongs to the hub, not to a game running full
+   bleed inside it. */
+body.mode-hexgl #scanlines,
+body.mode-hexgl #mute { display: none; }
+
+/* ---------------- rooms ----------------
+   One player per screen. Same cabinet rules as everything above: solid
+   fills, hard borders, offset shadows with no blur, sized to read from the
+   back of a room. */
+
+.room-stack, .lobby-stack { text-align: center; }
+.room-stack h2 { font-size: 44px; letter-spacing: 0.08em; margin: 6px 0 0; }
+.room-stack h2 em { font-style: normal; color: var(--p2); }
+.room-tag {
+  font-size: 12px; line-height: 1.7; color: #6b7487;
+  letter-spacing: 0.1em; margin: 12px auto 26px; max-width: 520px;
+}
+
+.room-cols { display: flex; align-items: stretch; justify-content: center; gap: 26px; }
+.room-col {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  min-width: 250px; padding: 22px 20px;
+  background: #0c1017; border: 4px solid #1e2636;
+}
+.room-col:first-child { border-color: var(--p1d); }
+.room-cols .room-col:last-child { border-color: var(--p2d); }
+.room-lab { font-size: 10px; letter-spacing: 0.3em; color: #5b6478; }
+.room-note { font-size: 10px; letter-spacing: 0.2em; color: #4f5768; }
+.room-or {
+  display: flex; align-items: center; font-size: 15px;
+  color: #39404f; font-weight: 700; letter-spacing: 0.2em;
+}
+
+/* The code is read aloud and typed back, so it is the largest thing in the
+   panel and monospaced hard - four characters, no ambiguity. */
+.room-code-in {
+  width: 190px; padding: 12px 10px;
+  font-family: var(--mono); font-size: 40px; font-weight: 700;
+  letter-spacing: 0.26em; text-indent: 0.26em; text-align: center;
+  text-transform: uppercase; color: var(--gold);
+  background: #05060a; border: 4px solid #2b3345; outline: none;
+}
+.room-code-in:focus { border-color: var(--gold); }
+.room-code-in::placeholder { color: #323a4c; letter-spacing: 0.2em; }
+
+.room-err {
+  min-height: 20px; margin: 16px 0 6px;
+  font-size: 12px; letter-spacing: 0.16em; color: var(--p1); opacity: 0;
+}
+.room-err.on { opacity: 1; animation: pulse .4s steps(2) 2; }
+
+#screen-room .btn.ghost { margin-top: 10px; font-size: 12px; padding: 10px 20px; }
+
+/* ---------------- lobby ---------------- */
+
+.lobby-code {
+  font-size: 92px; font-weight: 700; letter-spacing: 0.22em; text-indent: 0.22em;
+  color: var(--gold); line-height: 1.05; margin: 4px 0 8px;
+  text-shadow: 0 6px 0 #6b5510;
+}
+.lobby-hint { font-size: 11px; letter-spacing: 0.22em; color: #6b7487; margin-bottom: 30px; }
+
+.lobby-seats { display: flex; align-items: center; justify-content: center; gap: 22px; margin-bottom: 26px; }
+.seat {
+  min-width: 190px; padding: 18px 20px;
+  background: #0c1017; border: 4px solid #1e2636;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.seat b { font-size: 15px; letter-spacing: 0.14em; color: #5b6478; }
+.seat span { font-size: 10px; letter-spacing: 0.2em; color: #414857; }
+.seat.on { border-color: #2bd96b; }
+.seat.on b { color: #fff; }
+.seat.on span { color: #2bd96b; }
+.seat.me { border-color: var(--gold); }
+.seat.me b { color: var(--gold); }
+.seat.me span { color: var(--gold); }
+.lobby-vs { font-size: 20px; color: #39404f; font-weight: 700; letter-spacing: 0.16em; }
+
+.lobby-net {
+  display: inline-block; margin-bottom: 22px; padding: 5px 12px;
+  font-size: 9px; letter-spacing: 0.24em; color: #5b6478;
+  border: 1px solid #262e3e;
+}
+
+/* The crowd, counted by the relay rather than reported by either player.
+   Dim at zero and gold the moment somebody is actually watching - a lobby
+   that says "0 WATCHING" in bright text is a lobby drawing attention to an
+   empty room. */
+.lobby-crowd {
+  display: inline-block; margin: -14px 0 22px; padding: 5px 12px;
+  font-size: 9px; letter-spacing: 0.24em; color: #39404f;
+  border: 1px solid transparent;
+  transition: color .2s, border-color .2s;
+}
+.lobby-crowd.on { color: var(--gold); border-color: rgba(255,210,74,0.3); }
+
+/* ---------------- the opponent's half of the prompt screen ----------------
+   Their strategy is theirs until both sides lock in, so there is nothing in
+   this box to show but whether they are still typing. */
+
+.pbox.remote > textarea,
+.pbox.remote > .wc,
+.pbox.remote > .presets,
+.pbox.remote > .readout,
+.pbox.remote > .btn.lock { display: none; }
+
+.pbox.mine { border-color: var(--gold); }
+
+.remote-status {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 14px; padding: 20px;
+}
+.rs-dot {
+  width: 14px; height: 14px; background: #39404f;
+  animation: pulse 1.1s steps(2) infinite;
+}
+.pbox.remote.locked .rs-dot { background: #2bd96b; animation: none; }
+.rs-line { font-size: 17px; letter-spacing: 0.16em; color: #8791a5; }
+.pbox.remote.locked .rs-line { color: #2bd96b; }
+.rs-sub {
+  font-size: 9px; letter-spacing: 0.16em; line-height: 1.8;
+  color: #414857; max-width: 240px; text-align: center;
+}
+
+/* ---------------- analyze log, room lines ---------------- */
+
+#analyze-log .wait { color: var(--gold); }
+#analyze-log .bad { color: var(--p1); }
+
+/* ---------------- banner ----------------
+   For things the player must be told without the screen being taken away
+   from them - an opponent dropping mid-fight, a rejoin, a desync. */
+
+#room-note {
+  position: absolute; left: 50%; top: 16px; transform: translateX(-50%) translateY(-140%);
+  z-index: 80; padding: 10px 20px;
+  background: var(--p1); color: #05060a;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.16em;
+  border: 3px solid #05060a; box-shadow: 0 5px 0 #5c0c22;
+  transition: transform .22s cubic-bezier(.16,.9,.3,1);
+  pointer-events: none; white-space: nowrap;
+}
+#room-note.on { transform: translateX(-50%) translateY(0); }
+
+/* The join link. Lowercase on purpose - it is a URL someone will read
+   character by character, and the cabinet's global uppercase would lie
+   about what to type. */
+.lobby-share {
+  margin-bottom: 14px; font-size: 10px; letter-spacing: 0.08em;
+  color: #4f5768; text-transform: none; opacity: 0;
+  max-width: 620px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.lobby-share.on { opacity: 1; }
+
+/* ==================================================================
+   ARENA - public strategies, then the market.
+
+   The layout follows the product's one ordering rule: both strategies
+   read first, at full size, and the betting panel sits below them. A
+   market that opened above the thing being bet on would invite exactly
+   the behaviour the pre-match lock exists to prevent.
+================================================================== */
+
+.arena-stack {
+  width: min(1100px, 94vw);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px 0 40px;
+}
+
+.arena-top { text-align: center; }
+.arena-top h2 { margin: 0 0 8px; letter-spacing: 2px; }
+
+.arena-state {
+  display: inline-block;
+  font: 700 12px/1 var(--mono);
+  letter-spacing: 3px;
+  padding: 7px 14px;
+  border: 1px solid var(--dim);
+  color: var(--dim);
+}
+.arena-state.st-betting_open { color: var(--gold); border-color: var(--gold); }
+.arena-state.st-betting_closed,
+.arena-state.st-live { color: var(--p2); border-color: var(--p2); }
+.arena-state.st-settled { color: #6ee7a8; border-color: #6ee7a8; }
+.arena-state.st-voided,
+.arena-state.st-cancelled { color: var(--p1); border-color: var(--p1); }
+
+/* The honesty line. Demo mode is never quiet about being demo mode. */
+.chain-state {
+  margin-top: 8px;
+  font: 400 11px/1.5 var(--mono);
+  letter-spacing: 1px;
+}
+.chain-state.live { color: #6ee7a8; }
+.chain-state.demo { color: var(--gold); }
+
+.arena-wallet { margin-top: 10px; display: flex; gap: 10px; justify-content: center; align-items: center; }
+.arena-wallet code { font: 400 11px var(--mono); color: var(--dim); }
+
+/* ---- the two agent snapshots ---- */
+
+.agent-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.agent-card {
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(255, 255, 255, .02);
+  padding: 16px;
+  min-height: 190px;
+}
+.agent-card.side-a { border-top: 3px solid var(--p1); }
+.agent-card.side-b { border-top: 3px solid var(--p2); }
+
+.ag-side {
+  font: 700 11px/1 var(--mono);
+  letter-spacing: 3px;
+  color: var(--dim);
+  margin-bottom: 10px;
+}
+
+.agent-vs {
+  display: flex;
+  align-items: center;
+  font: 900 20px var(--mono);
+  color: var(--dim);
+}
+
+.ag-name { font: 900 20px/1.2 var(--mono); letter-spacing: 1px; margin-bottom: 2px; }
+.ag-owner { font: 400 10px var(--mono); color: var(--dim); margin-bottom: 10px; }
+.ag-prompt {
+  font: 400 13px/1.55 var(--mono);
+  color: #dfe4f0;
+  margin-bottom: 10px;
+  /* The strategy is the product. It gets room to breathe and is never
+     truncated behind an ellipsis - a bettor reading half a prompt is a
+     bettor who has not seen what they are backing. */
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.ag-arch { font: 700 11px var(--mono); letter-spacing: 2px; color: var(--gold); }
+.ag-model,
+.ag-hash { font: 400 10px/1.6 var(--mono); color: var(--dim); word-break: break-all; }
+.ag-stats { font: 700 11px var(--mono); letter-spacing: 1px; color: #aeb6c8; margin: 6px 0; }
+
+.agent-note {
+  font: 400 11px/1.6 var(--mono);
+  color: var(--dim);
+  text-align: center;
+  border: 1px dashed rgba(255, 255, 255, .16);
+  padding: 10px 14px;
+}
+
+/* ---- the economics, never hidden ---- */
+
+.pool-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.pool-cell {
+  border: 1px solid rgba(255, 255, 255, .12);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pool-cell.wide { grid-column: 1 / -1; }
+.pool-cell span { font: 400 10px var(--mono); letter-spacing: 2px; color: var(--dim); }
+.pool-cell b { font: 900 16px var(--mono); }
+.pool-cell.wide b { color: var(--gold); }
+
+.pool-note {
+  font: 400 11px var(--mono);
+  color: var(--dim);
+  text-align: center;
+}
+
+/* ---- the bet form ---- */
+
+.bet-form {
+  border: 1px solid rgba(255, 255, 255, .14);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+/* Closed means closed: the form stays visible so the numbers can still be
+   read, but nothing in it can be used. */
+.bet-form.locked { opacity: .45; pointer-events: none; }
+
+.bet-sides { display: flex; gap: 10px; }
+.side-btn { flex: 1; border: 1px solid var(--dim); background: transparent; color: var(--dim); }
+#btn-bet-a.on { border-color: var(--p1); color: var(--p1); }
+#btn-bet-b.on { border-color: var(--p2); color: var(--p2); }
+
+.bet-row { display: flex; gap: 10px; align-items: center; }
+.bet-row input {
+  flex: 1;
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid rgba(255, 255, 255, .18);
+  color: #fff;
+  font: 700 16px var(--mono);
+  padding: 10px 12px;
+}
+.bet-unit { font: 700 12px var(--mono); color: var(--dim); }
+
+.bet-quote { font: 700 13px var(--mono); min-height: 18px; }
+.bet-quote.up { color: #6ee7a8; }
+/* A pari-mutuel can pay less than the stake. When it will, the number says
+   so in the colour that means it. */
+.bet-quote.down { color: var(--p1); }
+
+.bet-mine,
+.bet-countdown { font: 400 11px var(--mono); color: var(--dim); }
+
+.arena-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.btn.sm { font-size: 11px; padding: 8px 14px; }
+
+.arena-log {
+  font: 400 11px/1.7 var(--mono);
+  color: #9aa3b5;
+  background: rgba(0, 0, 0, .35);
+  border: 1px solid rgba(255, 255, 255, .1);
+  padding: 12px;
+  max-height: 170px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 820px) {
+  .agent-grid { grid-template-columns: 1fr; }
+  .agent-vs { justify-content: center; padding: 4px 0; }
+  .pool-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ==================================================================
+   THE MARKET SCREEN  (#screen-market)
+
+   Between the reveal and the bell. Two players stand here watching the
+   crowd arrive, because the fight does not start until a backer is on
+   each side. See js/chain-room.js.
+   ================================================================== */
+
+.mk-stack {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: center;
+}
+
+.mk-stack h2 {
+  font-family: 'Archivo Black', system-ui, sans-serif;
+  font-size: clamp(22px, 4vw, 34px);
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+.mk-stack h2 span { color: var(--gold, #ffd24a); }
+
+.mk-status {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 13px;
+  opacity: 0.85;
+  min-height: 1.2em;
+}
+.mk-status.ok  { color: #6ef2a6; opacity: 1; }
+.mk-status.warn { color: #ffd24a; opacity: 1; }
+.mk-status.bad { color: #ff5d6c; opacity: 1; }
+
+.mk-fighters {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 14px;
+  align-items: stretch;
+  text-align: left;
+}
+.mk-f {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.mk-seat {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  opacity: 0.6;
+}
+.mk-arch {
+  font-family: 'Archivo Black', system-ui, sans-serif;
+  font-size: 19px;
+  line-height: 1.1;
+}
+.mk-prompt {
+  font-size: 12.5px;
+  line-height: 1.5;
+  opacity: 0.78;
+  font-style: italic;
+  min-height: 3.2em;
+}
+.mk-pool {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
+  padding-top: 8px;
+  margin-top: auto;
+}
+.mk-pool span { font-size: 11px; letter-spacing: 0.10em; opacity: 0.55; }
+.mk-pool b { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 15px; }
+
+.mk-vs {
+  align-self: center;
+  font-family: 'Archivo Black', system-ui, sans-serif;
+  opacity: 0.35;
+}
+
+/* One bar, two pools. Zero-width on a side is exactly the thing the
+   player is waiting to stop being true, so it is left visibly empty
+   rather than given a minimum. */
+.mk-bar {
+  display: flex;
+  height: 8px;
+  background: rgba(127, 127, 127, 0.20);
+  overflow: hidden;
+}
+.mk-bar i { display: block; height: 100%; }
+#mk-bar-1 { background: #ff5d6c; }
+#mk-bar-2 { background: #4fd0ff; }
+
+.mk-need {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  opacity: 0.85;
+}
+.mk-need.ok { color: #6ef2a6; }
+.mk-need.warn { color: #ffd24a; }
+
+.mk-clockrow {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  justify-content: center;
+  font-size: 12px;
+  letter-spacing: 0.10em;
+  opacity: 0.7;
+}
+.mk-clockrow b {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 22px;
+  opacity: 1;
+}
+
+.mk-share {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+.mk-share a {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 12.5px;
+  color: var(--gold, #ffd24a);
+  word-break: break-all;
+}
+
+.mk-fine {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.6;
+  opacity: 0.55;
+  max-width: 62ch;
+  margin-inline: auto;
+}
+
+@media (max-width: 680px) {
+  .mk-fighters { grid-template-columns: 1fr; }
+  .mk-vs { display: none; }
+}
+
+/* ==================================================================
+   SITE BRAND
+
+   The house lockup above the title. Same chevron as the landing page
+   and the favicon, drawn inline so it inherits the cabinet's accent and
+   needs no image request.
+   ================================================================== */
+
+.title-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  letter-spacing: 0.46em;
+  text-transform: uppercase;
+  color: #eef2f7;
+}
+
+.title-brand-mark {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  color: var(--gold);
+}
+
+/* ==================================================================
+   CHAMPION IDENTITY ON THE HUD AND THE WINNER CARD
+
+   The name of the champion each side is fighting as, and the crest + title
+   once one of them wins. Both are additive: with no champion in play the
+   elements stay empty and the screens read exactly as they always did.
+   ================================================================== */
+
+.hp-champ {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: #fff;
+  opacity: 0.85;
+}
+.hp-champ:empty { display: none; }
+
+.win-champ {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 6px auto 14px;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ch, var(--gold));
+}
+.win-champ[hidden] { display: none; }
+
+/* The session scoreboard for the champion that won. */
+.win-record {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0 auto 14px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #7c8595;
+}
+.win-record[hidden] { display: none; }
+.win-record b { font-size: 15px; color: var(--ch, #fff); }
+.win-record i { font-style: normal; color: #4f5768; }
+
+/* Points, paid to both fighters after the round. Sits under the record and
+   reads as its own receipt: one row per champion, the itemised breakdown on
+   the row's title. */
+.win-points {
+  max-width: 460px;
+  margin: 2px auto 16px;
+  padding: 12px 14px;
+  border: 1px solid #1e2431;
+  border-top-color: #2a3245;
+  background: rgba(12, 15, 22, 0.72);
+  text-align: left;
+}
+.win-points[hidden] { display: none; }
+.wp-head {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #4f5768;
+  margin-bottom: 9px;
+}
+.wp-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: baseline;
+  gap: 10px;
+  padding: 3px 0;
+}
+.wp-name {
+  font-size: 11.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ch, #e8edf5);
+}
+.wp-gain {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 15px;
+  color: var(--ch, #fff);
+}
+.wp-total {
+  font-style: normal;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  color: #7c8595;
+  min-width: 74px;
+  text-align: right;
+}
+.wp-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid #1a2030;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #4f5768;
+}
+.wp-foot b {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 12.5px;
+  letter-spacing: 0;
+  color: #e8edf5;
+}
+.wp-foot i { font-style: normal; }
+
+/* The round in numbers: the simulation's own counters, nothing estimated. */
+.win-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+  gap: 10px 18px;
+  margin: 22px auto 0;
+  padding-top: 18px;
+  border-top: 1px solid #1e2431;
+  max-width: 640px;
+  text-align: left;
+}
+.win-summary:empty { display: none; }
+.win-summary > div {
+  display: grid;
+  gap: 3px;
+}
+.win-summary dt {
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #4f5768;
+}
+.win-summary dd {
+  margin: 0;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 12.5px;
+  color: #e8edf5;
+}
+
+/* A connected wallet chip. */
+.btn.on { background: #2bd96b; color: #05060a; }
+.win-champ::before {
+  content: '';
+  width: 22px;
+  height: 22px;
+  flex: none;
+  background: currentColor;
+  -webkit-mask: linear-gradient(#000 0 0) center / 100% 100% no-repeat;
+  mask: linear-gradient(#000 0 0) center / 100% 100% no-repeat;
+  clip-path: polygon(0 0, 50% 100%, 100% 0, 82% 0, 50% 62%, 18% 0);
+}

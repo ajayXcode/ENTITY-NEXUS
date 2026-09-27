@@ -1,0 +1,683 @@
+/* ==================================================================
+   spectate.css - the floor.
+
+   Loaded after site.css and reads its tokens rather than redeclaring any
+   colour: --fg, --muted, --faint, --hair, --hair2, --surface, --accent are
+   all supplied by the .band-dark this page sits in, and --p1 / --p2 / --gold
+   are the brand constants on :root. Nothing here hardcodes a colour that
+   site.css already names, so this page follows the site if the site moves.
+
+   The one structural idea: a board on the left that you scan, and one match
+   on the right that you commit to. The board is a list because a spectator
+   is comparing - status, archetypes, how big the pool is - and comparison
+   wants rows, not cards in a grid. The detail is a single column because
+   once you have picked, you are reading downward: who is fighting, what the
+   pool looks like, what your bet would return, what you are owed.
+   ================================================================== */
+
+.spec-body { background: #05060a; }
+
+/* The nav on this page never sits over a hero, so it is opaque from the
+   first pixel rather than fading in on scroll. */
+.spec-main { padding-top: clamp(96px, 11vw, 140px); }
+
+.spec-head { margin-bottom: clamp(28px, 3.5vw, 44px); }
+.spec-head h2 em { font-style: normal; color: var(--accent); }
+
+/* ------------------------------------------------------------------
+   Status bar - what mode this page is actually in
+
+   Deliberately the first thing under the headline. A spectator page that
+   does not say, immediately and in plain words, whether it is moving real
+   MON is a page that misleads by omission.
+------------------------------------------------------------------- */
+
+.spec-status {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: clamp(22px, 2.6vw, 34px);
+}
+
+.ss-cell {
+  padding: 16px 22px;
+  border-left: 1px solid var(--hair);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.ss-cell:first-child { border-left: 0; }
+
+.ss-cell dt {
+  font-family: var(--mono); font-size: 9.5px; font-weight: 500;
+  letter-spacing: 0.24em; text-transform: uppercase; color: var(--faint);
+}
+.ss-cell dd {
+  margin: 0;
+  font-family: var(--cond); font-size: 19px; font-weight: 700;
+  letter-spacing: 0.04em; text-transform: uppercase; color: var(--fg);
+}
+.ss-cell dd code { font-family: var(--mono); font-size: 13px; letter-spacing: 0; }
+.ss-cell dd.ok { color: var(--good); }
+.ss-cell dd.warn { color: var(--gold); }
+
+.ss-wallet { flex-direction: row; align-items: center; flex-wrap: wrap; }
+.ss-wallet dt { width: 100%; }
+.ss-wallet dd { flex: 1; }
+
+/* ------------------------------------------------------------------
+   The two columns
+------------------------------------------------------------------- */
+
+.spec-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+  gap: clamp(18px, 2.2vw, 30px);
+  align-items: start;
+}
+
+/* ---- the board ---- */
+
+.spec-list { position: sticky; top: 92px; }
+
+.ml { max-height: min(62vh, 680px); overflow-y: auto; }
+
+.ml-row {
+  display: grid; gap: 7px;
+  width: 100%; padding: 15px 20px 16px;
+  background: transparent; border: 0;
+  border-bottom: 1px solid var(--hair);
+  text-align: left; cursor: pointer;
+  color: var(--fg);
+  transition: background .14s linear;
+}
+.ml-row:hover { background: rgba(255,255,255,0.045); }
+
+/* The selected row keeps a gold rail down its left edge rather than a full
+   fill: the row is still one of a list, and a filled row reads as a button
+   that has been pressed and is now busy. */
+.ml-row.on { background: rgba(255,210,74,0.07); box-shadow: inset 3px 0 0 var(--gold); }
+
+.mr-top { display: flex; align-items: center; gap: 10px; }
+
+.mr-code {
+  font-family: var(--mono); font-size: 15px; font-weight: 700;
+  letter-spacing: 0.22em; color: var(--fg);
+}
+
+.mr-mode, .mr-status {
+  font-style: normal;
+  font-family: var(--mono); font-size: 9px; font-weight: 500;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  padding: 3px 7px; border: 1px solid var(--hair2); color: var(--muted);
+}
+.mr-status { margin-left: auto; border-color: transparent; }
+
+/* Status carries the only colour in a row, because status is the only thing
+   a scanning eye is actually sorting on. */
+.s-live  .mr-status, .s-live  { color: var(--p1); }
+.s-ready .mr-status { color: var(--gold); }
+.s-done  .mr-status { color: var(--good); }
+.s-gone  .mr-status, .s-lobby .mr-status, .s-writing .mr-status { color: var(--faint); }
+
+.s-live .mr-status { border-color: rgba(255,59,107,0.4); animation: specPulse 1.6s ease-in-out infinite; }
+@keyframes specPulse { 50% { opacity: 0.45; } }
+@media (prefers-reduced-motion: reduce) {
+  .s-live .mr-status { animation: none; }
+}
+
+.mr-fight {
+  display: flex; align-items: baseline; gap: 9px;
+  font-family: var(--cond); font-weight: 800; text-transform: uppercase;
+  font-size: 19px; letter-spacing: -0.01em; line-height: 1.05;
+}
+.mr-fight em { font-style: normal; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mr-a1 { color: var(--p1); }
+.mr-a2 { color: var(--p2); }
+.mr-fight s {
+  text-decoration: none; color: var(--faint);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+}
+
+.mr-foot {
+  display: flex; justify-content: space-between; gap: 12px;
+  font-family: var(--mono); font-size: 10.5px; color: var(--faint);
+}
+.mr-foot i { font-style: normal; }
+.mr-pool.won { color: var(--good); }
+
+/* ---- the detail ---- */
+
+.spec-empty {
+  padding: clamp(40px, 6vw, 72px) clamp(24px, 4vw, 48px);
+  text-align: center;
+}
+.se-mark {
+  width: 46px; height: 46px; margin: 0 auto 22px;
+  border: 2px solid var(--hair2);
+  transform: rotate(45deg);
+}
+.spec-empty h3 {
+  margin: 0 0 12px;
+  font-family: var(--cond); font-weight: 800; text-transform: uppercase;
+  font-size: 30px; letter-spacing: -0.02em;
+}
+.spec-empty p { margin: 0 auto; max-width: 44ch; color: var(--muted); font-size: 15.5px; }
+
+.detail-card .panel-bar b { color: var(--fg); letter-spacing: 0.22em; }
+.detail-card .panel-bar .s-live { color: var(--p1); }
+.detail-card .panel-bar .s-done { color: var(--good); }
+
+/* ---- the two fighters ---- */
+
+.d-fighters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.d-fighter { padding: 20px 22px 22px; display: flex; flex-direction: column; gap: 12px; }
+.d-fighter.p2 { text-align: right; }
+
+/* A won/lost pair reads instantly without a label: the loser recedes. */
+.d-fighter.won { background: rgba(73,224,122,0.055); }
+.d-fighter.lost { opacity: 0.45; }
+
+.d-fighter header { display: flex; flex-direction: column; gap: 4px; }
+.d-tag {
+  font-family: var(--mono); font-size: 9px; font-weight: 500;
+  letter-spacing: 0.24em; text-transform: uppercase; color: var(--faint);
+}
+.d-arch {
+  font-family: var(--cond); font-weight: 800; text-transform: uppercase;
+  font-size: clamp(22px, 2.4vw, 30px); line-height: 1; letter-spacing: -0.02em;
+}
+.p1 .d-arch { color: var(--p1); }
+.p2 .d-arch { color: var(--p2); }
+
+.d-bars { display: grid; gap: 7px; }
+.d-bar { display: flex; align-items: center; gap: 9px; }
+.p2 .d-bar { flex-direction: row-reverse; }
+.d-bar span {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em;
+  color: var(--faint); width: 26px;
+}
+.d-bar i { flex: 1; height: 5px; background: var(--hair); display: block; }
+.d-bar u { display: block; height: 100%; background: currentColor; }
+.p1 .d-bar u { background: var(--p1); }
+.p2 .d-bar u { background: var(--p2); }
+.p2 .d-bar i { display: flex; justify-content: flex-end; }
+.d-bar b { font-family: var(--mono); font-size: 11px; color: var(--muted); width: 20px; }
+
+.d-prompt {
+  margin: 0; quotes: '\201C' '\201D';
+  font-size: 14.5px; line-height: 1.55; color: var(--muted);
+}
+.d-prompt::before { content: open-quote; }
+.d-prompt::after { content: close-quote; }
+
+.d-addr { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.d-addr.none { color: var(--faint); }
+
+.d-vs {
+  display: flex; align-items: center; padding: 0 6px;
+  border-left: 1px solid var(--hair); border-right: 1px solid var(--hair);
+}
+.d-vs span {
+  font-family: var(--cond); font-weight: 800; font-size: 15px;
+  letter-spacing: 0.16em; color: var(--faint);
+}
+
+/* ---- the pool ---- */
+
+.d-pool { padding: 20px 22px; border-top: 1px solid var(--hair); }
+
+.dp-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 11px;
+}
+.dp-head span {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.24em;
+  text-transform: uppercase; color: var(--faint);
+}
+.dp-head b { font-family: var(--cond); font-size: 22px; font-weight: 800; letter-spacing: 0.02em; }
+
+.dp-bar { display: flex; height: 12px; background: var(--hair); overflow: hidden; }
+.dp-bar i { display: block; transition: width .3s cubic-bezier(.16,.9,.3,1); }
+.dp-p1 { background: var(--p1); }
+.dp-p2 { background: var(--p2); }
+
+.dp-legend {
+  display: flex; justify-content: space-between; margin-top: 9px;
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+}
+.dp-legend i { font-style: normal; color: var(--faint); }
+.dp-legend .l1 b { color: var(--p1); }
+.dp-legend .l2 b { color: var(--p2); }
+
+/* ---- the bet form ---- */
+
+.d-bet { padding: 20px 22px 22px; border-top: 1px solid var(--hair); display: grid; gap: 16px; }
+
+.db-sides { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.db-side {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 12px 14px; cursor: pointer; text-align: left;
+  background: transparent; border: 1px solid var(--hair2); color: var(--fg);
+  transition: border-color .15s, background .15s;
+}
+.db-side span {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--faint);
+}
+.db-side b {
+  font-family: var(--cond); font-weight: 800; text-transform: uppercase;
+  font-size: 18px; letter-spacing: -0.01em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.db-side[data-side="p1"] b { color: var(--p1); }
+.db-side[data-side="p2"] b { color: var(--p2); }
+.db-side:hover { border-color: var(--fg); }
+.db-side.on { border-color: var(--gold); background: rgba(255,210,74,0.08); }
+
+.db-amount { display: grid; gap: 10px; }
+.db-amount > label {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.24em;
+  text-transform: uppercase; color: var(--faint);
+}
+.db-in {
+  display: flex; align-items: center; gap: 10px;
+  border: 1px solid var(--hair2); padding: 0 16px;
+}
+.db-in:focus-within { border-color: var(--gold); }
+.db-in input {
+  flex: 1; min-width: 0;
+  background: transparent; border: 0; outline: 0; padding: 13px 0;
+  font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--fg);
+}
+.db-in span {
+  font-family: var(--cond); font-size: 16px; font-weight: 700;
+  letter-spacing: 0.14em; color: var(--faint);
+}
+
+.db-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.db-chips button {
+  background: transparent; border: 1px solid var(--hair);
+  color: var(--muted); cursor: pointer; padding: 6px 12px;
+  font-family: var(--mono); font-size: 11px;
+  transition: border-color .15s, color .15s;
+}
+.db-chips button:hover { border-color: var(--gold); color: var(--gold); }
+
+.db-quote {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  margin: 0; border: 1px solid var(--hair);
+}
+.db-quote > div { padding: 13px 16px; border-left: 1px solid var(--hair); }
+.db-quote > div:first-child { border-left: 0; }
+.db-quote dt {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--faint); margin-bottom: 5px;
+}
+.db-quote dd { margin: 0; font-family: var(--cond); font-size: 15px; color: var(--muted); }
+.db-quote dd b {
+  font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--fg);
+}
+.db-quote > div:last-child dd b { color: var(--gold); }
+
+.db-go { width: 100%; text-align: center; }
+.db-go:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.db-note { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--faint); }
+.db-note.warn { color: var(--gold); }
+
+/* ---- your position ---- */
+
+.d-mine { padding: 18px 22px 20px; border-top: 1px solid var(--hair); display: grid; gap: 10px; }
+.dm-row { display: flex; justify-content: space-between; gap: 14px; align-items: baseline; }
+.dm-row span {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--faint);
+}
+.dm-row b { font-family: var(--mono); font-size: 14px; color: var(--fg); text-align: right; }
+#dm-owed { color: var(--gold); }
+
+/* ---- the room feed ---- */
+
+.d-feed { border-top: 1px solid var(--hair); }
+.fl {
+  height: 168px; overflow-y: auto;
+  padding: 12px 22px 16px;
+  font-family: var(--mono); font-size: 11.5px; line-height: 1.75;
+  color: var(--muted);
+}
+.fl div { white-space: pre-wrap; }
+.fl .ok   { color: var(--good); }
+.fl .bad  { color: var(--p1); }
+.fl .warn { color: var(--gold); }
+
+/* ------------------------------------------------------------------
+   How the pool pays
+------------------------------------------------------------------- */
+
+.spec-rules { margin-top: clamp(42px, 5vw, 72px); border-top: 1px solid var(--hair); padding-top: clamp(28px, 3.4vw, 46px); }
+.spec-rules h3 {
+  margin: 0 0 clamp(20px, 2.4vw, 32px);
+  font-family: var(--cond); font-weight: 800; text-transform: uppercase;
+  font-size: clamp(26px, 3.4vw, 44px); letter-spacing: -0.02em;
+}
+
+.sr-steps {
+  list-style: none; margin: 0; padding: 0; counter-reset: sr;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(16px, 2vw, 30px);
+}
+.sr-steps li { counter-increment: sr; border-top: 2px solid var(--hair2); padding-top: 14px; }
+.sr-steps li::before {
+  content: counter(sr, decimal-leading-zero);
+  display: block; margin-bottom: 9px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; color: var(--accent);
+}
+.sr-steps b {
+  display: block; margin-bottom: 6px;
+  font-family: var(--cond); font-weight: 800; text-transform: uppercase;
+  font-size: 18px; letter-spacing: -0.01em; color: var(--fg);
+}
+.sr-steps span { font-size: 14.5px; line-height: 1.6; color: var(--muted); }
+.sr-steps code { font-family: var(--mono); font-size: 12.5px; color: var(--accent); }
+.spec-rules .cap { border-top: 1px solid var(--hair); margin-top: clamp(20px, 2.4vw, 32px); padding-left: 0; }
+
+/* ------------------------------------------------------------------
+   The transient error line
+------------------------------------------------------------------- */
+
+#spec-note {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(16px);
+  z-index: 90; max-width: min(620px, calc(100% - 32px));
+  padding: 13px 20px;
+  background: var(--gold); color: #14151a;
+  font-family: var(--mono); font-size: 12.5px; line-height: 1.5;
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+}
+#spec-note.on { opacity: 1; transform: translateX(-50%); }
+
+/* ------------------------------------------------------------------
+   Narrow
+------------------------------------------------------------------- */
+
+.hidden { display: none !important; }
+
+@media (max-width: 1080px) {
+  .spec-grid { grid-template-columns: minmax(0, 1fr); }
+  .spec-list { position: static; }
+  .ml { max-height: 340px; }
+  .sr-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .spec-status { grid-template-columns: 1fr 1fr; }
+  .ss-cell:nth-child(3) { border-left: 0; }
+  .ss-cell:nth-child(n+3) { border-top: 1px solid var(--hair); }
+
+  /* The VS rail is a three-column idea. Stacked, the two fighters become two
+     rows and the divider becomes the line between them. */
+  .d-fighters { grid-template-columns: minmax(0, 1fr); }
+  .d-fighter.p2 { text-align: left; border-top: 1px solid var(--hair); }
+  .p2 .d-bar { flex-direction: row; }
+  .p2 .d-bar i { display: block; }
+  .d-vs { display: none; }
+
+  .db-sides { grid-template-columns: 1fr; }
+  .db-quote { grid-template-columns: 1fr; }
+  .db-quote > div { border-left: 0; border-top: 1px solid var(--hair); }
+  .db-quote > div:first-child { border-top: 0; }
+  .sr-steps { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ==================================================================
+   THE HOUSE FLOOR
+   ==================================================================
+
+   Two additions, and both of them are about being straight with whoever
+   is about to put MON on a fighter:
+
+     .d-house   what a house match is, stated in the panel where the bet
+                is placed rather than in a footnote nobody scrolls to.
+     .d-fight   the fight itself, running on this page.
+   ------------------------------------------------------------------ */
+
+/* Marked with the warning accent rather than the gold one. Gold on this
+   page means "this is the good part, look here"; the house note is not a
+   feature being sold, it is a caveat being declared, and it should read
+   like one. */
+.d-house {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--hair);
+  background: rgba(255, 210, 74, 0.05);
+  border-left: 3px solid var(--gold);
+}
+.d-house b {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.10em;
+  color: var(--gold);
+}
+.d-house span {
+  margin-left: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+}
+.d-house p {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.d-house code { font-size: 11px; }
+
+/* The board row for a house table. A left edge and nothing else - it has
+   to be distinguishable at a glance without turning the floor into two
+   visually competing classes of match, because they are not two classes
+   of match as far as the money is concerned. */
+.ml-row.is-house { border-left: 3px solid rgba(255, 210, 74, 0.55); }
+
+/* ---------------- the fight ---------------- */
+
+.d-fight { border-bottom: 1px solid var(--hair); }
+
+/* The engine draws at a fixed 1024x576 and clamps the fighters to those
+   numbers - they are simulation inputs, not layout (see the canvas note in
+   house/sim.js). So the canvas keeps its intrinsic size and the BOX scales,
+   rather than the width being handed to the engine. */
+.fh-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #05060a;
+}
+.fh-stage canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.fh {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--hair);
+}
+.fh-side b {
+  display: block;
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fh-2 { text-align: right; }
+
+.fh-bar {
+  height: 8px;
+  background: rgba(127, 127, 127, 0.22);
+  overflow: hidden;
+}
+.fh-bar i {
+  display: block;
+  height: 100%;
+  /* No transition. A health bar that eases is a health bar that disagrees
+     with the frame on screen, and on this page the frame is the evidence. */
+  background: var(--gold);
+}
+.fh-1 .fh-bar { direction: rtl; }
+.fh-1 .fh-bar i { background: #ff5d6c; }
+.fh-2 .fh-bar i { background: #4fd0ff; }
+
+.fh-clock {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 22px;
+  font-weight: 700;
+  min-width: 2.5ch;
+  text-align: center;
+}
+
+.fh-foot {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+}
+.fh-foot .cap { margin: 0; }
+
+@media (max-width: 720px) {
+  .fh { grid-template-columns: 1fr auto 1fr; gap: 8px; padding: 8px 10px; }
+  .fh-side b { font-size: 13px; }
+  .fh-clock { font-size: 18px; }
+  .fh-foot { flex-direction: column; align-items: flex-start; }
+}
+
+/* ---------------- the start gate ----------------
+
+   No fight starts until a backer is on each side. For a spectator that is
+   not a restriction but the call to action, so it sits directly above the
+   pool bar it is talking about. */
+.d-gate {
+  margin: 0;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--hair);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.d-gate.warn {
+  color: var(--fg);
+  background: rgba(255, 210, 74, 0.06);
+  border-left: 3px solid var(--gold);
+}
+.d-gate.ok {
+  color: var(--fg);
+  background: rgba(110, 242, 166, 0.06);
+  border-left: 3px solid #6ef2a6;
+}
+
+/* ---------------- your bets ----------------
+
+   Read from the chain, not the board, so a payout outlives the match that
+   produced it. See js/mybets.js. */
+.my-bets { margin-top: 22px; }
+.my-bets .cap { padding: 10px 14px 0; margin: 0; }
+
+.mb { display: flex; flex-direction: column; }
+
+.mb-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-top: 1px solid var(--hair);
+  min-width: 0;
+}
+.mb-row:first-child { border-top: 0; }
+
+.mb-main { display: flex; gap: 10px; align-items: baseline; min-width: 0; }
+.mb-id {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 13px;
+  opacity: 0.7;
+  flex: none;
+}
+.mb-backed {
+  font-size: 12.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mb-right { display: flex; gap: 10px; align-items: center; flex: none; }
+
+.mb-state {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.mb-state.win  { color: #6ef2a6; }
+.mb-state.lost { color: var(--muted); }
+.mb-state.open { color: var(--muted); }
+.mb-state.done { color: var(--muted); }
+
+.mb-owed {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 13px;
+}
+
+@media (max-width: 720px) {
+  .mb-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .mb-backed { white-space: normal; }
+}
+
+/* ---------------- the fight, full screen ----------------
+
+   #fight-wrap is what goes full screen, not the bare canvas, so the health
+   bars and the clock come with it.
+
+   The stage keeps its 16:9 box and is capped to whatever fits the viewport
+   height once the HUD and footer have taken theirs. The canvas is stretched
+   to fill its box by CSS, so letting that box go off-ratio would distort the
+   fighters - hence sizing by width from the available height rather than
+   just letting it grow. */
+#fight-wrap:fullscreen,
+#fight-wrap:-webkit-full-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #05060a;
+  border-bottom: 0;
+}
+
+#fight-wrap:fullscreen .fh-stage,
+#fight-wrap:-webkit-full-screen .fh-stage {
+  width: min(100vw, calc((100vh - 140px) * 16 / 9));
+  margin-inline: auto;
+}
+
+/* Bigger type at arm's length - full screen is the across-the-room view. */
+#fight-wrap:fullscreen .fh-side b,
+#fight-wrap:-webkit-full-screen .fh-side b { font-size: 22px; }
+#fight-wrap:fullscreen .fh-clock,
+#fight-wrap:-webkit-full-screen .fh-clock { font-size: 32px; }
+#fight-wrap:fullscreen .fh-bar,
+#fight-wrap:-webkit-full-screen .fh-bar { height: 12px; }
+#fight-wrap:fullscreen .fh,
+#fight-wrap:-webkit-full-screen .fh { padding: 14px 24px; }
+#fight-wrap:fullscreen .fh-foot,
+#fight-wrap:-webkit-full-screen .fh-foot { padding: 10px 24px; }

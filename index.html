@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ENTITY NEXUS &mdash; Design. Disrupt. Conquer.</title>
+<meta name="description" content="ENTITY NEXUS is a deterministic arena fighter. Cast a line of film dialogue, and a fighter is built from it. Seventeen champions, twenty-five lines from five cinemas, one 25-second round, every fight re-runnable and settled on Monad." />
+<meta name="theme-color" content="#05060a" />
+
+<meta property="og:title" content="ENTITY NEXUS" />
+<meta property="og:description" content="Design. Disrupt. Conquer." />
+<meta property="og:type" content="website" />
+
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<!-- Two faces, two jobs. PODIUM carries the wordmark and the headline;
+     Inter carries every other word on the page. -->
+<link href="https://db.onlinewebfonts.com/c/8b75d9dcff6a48c35a46656192adf019?family=FSP+DEMO+-+PODIUM+Sharp+4.11" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="entity-nexus.css?v=2" />
+<link rel="stylesheet" href="champions.css?v=3" />
+<link rel="stylesheet" href="wallet.css?v=1" />
+</head>
+<body class="en-body">
+
+<!-- ==================================================================
+     HERO
+
+     One viewport-height section. Looping background clip, all content
+     overlaid on top of it, everything left-aligned and arriving on a
+     stagger so the eye walks down the page instead of being handed the
+     whole thing at once.
+     ================================================================== -->
+<div class="vg">
+
+  <video class="en-video" autoplay muted loop playsinline aria-hidden="true"
+         src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260606_154941_df1a96e1-a06f-450c-bd02-d863414cc1a0.mp4">
+  </video>
+  <div class="en-scrim" aria-hidden="true"></div>
+
+  <div class="en-stage">
+
+    <!-- ---------- navbar ---------- -->
+    <header class="en-nav">
+      <a class="en-brand font-podium" href="index.html" aria-label="ENTITY NEXUS - home">
+        <svg class="en-brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path
+          d="M4 5 L16 27 L28 5" fill="none" stroke="currentColor"
+          stroke-width="3.4" stroke-linejoin="miter"/></svg>
+        <span>ENTITY NEXUS</span>
+      </a>
+
+      <!-- Same five words the inner pages use. The landing page used to
+           carry an agency nav (Projects / Studio / Offerings / Inquire) that
+           pointed at a game, which is how a visitor ended up asking who our
+           clients were. -->
+      <nav class="en-links font-inter" aria-label="Sections">
+        <a href="champions.html">Champions</a>
+        <a href="dialogues.html">Vault</a>
+        <a href="matchup.html">Lab</a>
+        <a href="#cabinet">Cabinet</a>
+        <a href="#floor">Floor</a>
+      </nav>
+
+      <button class="en-wallet font-inter wchip" id="en-wallet" type="button"
+              data-wallet-chip aria-haspopup="true">
+        <i aria-hidden="true"></i><span>Connect wallet</span>
+      </button>
+
+      <a class="en-cta font-inter" href="play.html">
+        Insert coin
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
+        </svg>
+      </a>
+
+      <button class="en-burger" id="en-burger" type="button"
+              aria-label="Open menu" aria-expanded="false" aria-controls="en-menu">
+        <i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i>
+      </button>
+    </header>
+
+    <!-- ---------- hero content ---------- -->
+    <div class="en-hero">
+
+      <p class="en-tagline font-inter animate-fade-up">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.735H5.81a1 1 0 0 1-.957-.735L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/>
+          <path d="M5 21h14"/>
+        </svg>
+        Two lines of dialogue. One 25-second round.
+      </p>
+
+      <h1 class="en-h1 font-podium animate-fade-up-delay-1">
+        <span>Cast.</span>
+        <span>Clash.</span>
+        <span>Conquer.</span>
+      </h1>
+
+      <p class="en-sub font-inter animate-fade-up-delay-2">
+        Pick a line out of the vault. The parser turns it into a fighter.<br />
+        Same line, same seed &mdash; <b>same fight, forever.</b>
+      </p>
+
+      <div class="en-actions animate-fade-up-delay-3">
+        <a class="en-btn-dark font-inter" href="#roster">
+          Meet the champions
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
+          </svg>
+        </a>
+
+        <div class="en-award font-inter">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2 4 5v7c0 5 3.4 8.4 8 10 4.6-1.6 8-5 8-10V5z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+          <div>Built on<br />Monad Testnet</div>
+        </div>
+      </div>
+
+      <div class="en-stats font-inter animate-fade-up-delay-4">
+        <div><b>25</b><span>Lines In The Vault</span></div>
+        <div><b>17</b><span>Forged Champions</span></div>
+        <div><b>25s</b><span>A Round, No Draws</span></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ---------- mobile menu overlay (below md only) ---------- -->
+<div class="en-menu" id="en-menu" aria-hidden="true">
+  <div class="en-menu-head">
+    <a class="en-brand font-podium" href="index.html">
+      <svg class="en-brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path
+        d="M4 5 L16 27 L28 5" fill="none" stroke="currentColor"
+        stroke-width="3.4" stroke-linejoin="miter"/></svg>
+      <span>ENTITY NEXUS</span>
+    </a>
+    <button class="en-menu-close" id="en-close" type="button" aria-label="Close menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+      </svg>
+    </button>
+  </div>
+
+  <nav class="en-menu-body font-podium" aria-label="Sections">
+    <!-- each item's delay is inline: transitionDelay = i * 80 + 100ms -->
+    <a class="en-menu-link" href="champions.html" style="transition-delay:100ms">Champions</a>
+    <a class="en-menu-link" href="dialogues.html" style="transition-delay:140ms">Vault</a>
+    <a class="en-menu-link" href="matchup.html"   style="transition-delay:180ms">Lab</a>
+    <a class="en-menu-link" href="#cabinet"       style="transition-delay:260ms">Cabinet</a>
+    <a class="en-menu-link" href="#floor"         style="transition-delay:340ms">Floor</a>
+    <a class="en-menu-cta font-inter" href="play.html" style="transition-delay:420ms">
+      Insert coin
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
+      </svg>
+    </a>
+  </nav>
+</div>
+
+<main>
+
+  <!-- ============ THE ROSTER ============
+       Filled from js/characters.js, and every card's archetype and stats come
+       from the game's own parsePrompt() rather than anything written here.
+       This page cannot claim a champion is something the cabinet would not
+       build. -->
+  <section class="en-band" id="roster">
+    <div class="en-wrap">
+      <header class="en-band-head">
+        <span class="en-eyebrow">The roster</span>
+        <h2 class="font-podium">Seventeen champions.<br /><em>Eight ways to win.</em></h2>
+        <p class="en-band-note">Every champion is a fixed combat identity &mdash;
+          species, style, weapons, role and traits &mdash; and its stats are
+          read off its strategy by the game&rsquo;s own parser, so a card can
+          never claim something the cabinet would not build. Two of them,
+          RAPHAEL and MALGRAVE, fight in their own sprites. Field one and its
+          strategy is written for you, or cast a line out of the
+          <a href="dialogues.html">dialogue vault</a> and the same parser
+          builds a fighter out of the line instead. All eight archetypes the
+          parser can produce are on the roster.</p>
+      </header>
+
+      <div class="en-roster-grid" id="roster-grid"></div>
+
+      <a class="en-more font-inter" href="champions.html">
+        Open the champion index
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ THE ARENA ============ -->
+  <section class="en-band en-band-alt" id="arena">
+    <div class="en-wrap">
+      <header class="en-band-head">
+        <span class="en-eyebrow">The machine</span>
+        <h2 class="font-podium">Five doors.<br /><em>One simulation.</em></h2>
+        <p class="en-band-note">A deterministic 60&nbsp;FPS fight with no input
+          once the bell rings: the whole round is a pure function of both
+          lines and a seed, so it can be replayed and audited rather than
+          trusted. The floor runs a pari&#8209;mutuel pool on
+          <code>ArenaBattle</code>, and a settled winner mints on Monad with
+          its line, seed and result on the token.</p>
+      </header>
+
+      <div class="en-dest">
+        <a class="en-dest-card" id="vault" href="dialogues.html">
+          <span class="en-dest-k">01 &mdash; The vault</span>
+          <h3 class="font-podium">Cast a line</h3>
+          <p>Twenty-five lines out of Hindi, English, Tamil, Telugu and Korean
+            cinema. Cast one and the parser builds your fighter out of it.</p>
+          <span class="en-dest-go">Open the vault <b aria-hidden="true">&rarr;</b></span>
+        </a>
+
+        <a class="en-dest-card" id="cabinet" href="play.html">
+          <span class="en-dest-k">02 &mdash; The cabinet</span>
+          <h3 class="font-podium">Build a fighter</h3>
+          <p>Cast a dialogue or field a champion. Sixty seconds to lock in,
+            then neither side touches a key until the bell.</p>
+          <span class="en-dest-go">Insert coin <b aria-hidden="true">&rarr;</b></span>
+        </a>
+
+        <a class="en-dest-card" id="floor" href="spectate.html">
+          <span class="en-dest-k">03 &mdash; The floor</span>
+          <h3 class="font-podium">Back a side</h3>
+          <p>Every live match on this server, both lines public before any
+            money moves, and the pool settled the moment the match is.</p>
+          <span class="en-dest-go">Open the floor <b aria-hidden="true">&rarr;</b></span>
+        </a>
+
+        <a class="en-dest-card" id="chain" href="play.html">
+          <span class="en-dest-k">04 &mdash; On-chain</span>
+          <h3 class="font-podium">Mint the winner</h3>
+          <p>Two lines and a seed are small enough to store on the token.
+            Re-run the bout a year later and it ends the same way.</p>
+          <span class="en-dest-go">Mint on Monad <b aria-hidden="true">&rarr;</b></span>
+        </a>
+
+        <a class="en-dest-card" id="lab" href="matchup.html">
+          <span class="en-dest-k">05 &mdash; The lab</span>
+          <h3 class="font-podium">Settle a debate</h3>
+          <p>Put any two champions through a fixed series of seeded fights on
+            the real engine and see the split with every seed printed.</p>
+          <span class="en-dest-go">Run a series <b aria-hidden="true">&rarr;</b></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="en-foot">
+  <div class="en-wrap en-foot-grid">
+    <div class="en-foot-brand font-podium">
+      <svg class="en-brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path
+        d="M4 5 L16 27 L28 5" fill="none" stroke="currentColor"
+        stroke-width="3.4" stroke-linejoin="miter"/></svg>
+      <span>ENTITY NEXUS</span>
+    </div>
+    <nav class="en-foot-links font-inter" aria-label="Pages">
+      <a href="champions.html">Champion index</a>
+      <a href="dialogues.html">Dialogue vault</a>
+      <a href="matchup.html">Matchup lab</a>
+      <a href="play.html">Cabinet</a>
+      <a href="spectate.html">Spectate &amp; bet</a>
+    </nav>
+    <div class="en-foot-note font-inter">Built on Monad</div>
+  </div>
+</footer>
+
+<!-- ---------- mobile menu ---------- -->
+<script>
+(function () {
+  var menu = document.getElementById('en-menu')
+  var burger = document.getElementById('en-burger')
+  var close = document.getElementById('en-close')
+  if (!menu || !burger) return
+
+  function setOpen(open) {
+    menu.classList.toggle('open', open)
+    menu.setAttribute('aria-hidden', open ? 'false' : 'true')
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false')
+    document.body.style.overflow = open ? 'hidden' : ''
+  }
+
+  burger.addEventListener('click', function () { setOpen(true) })
+  close.addEventListener('click', function () { setOpen(false) })
+  // Every link in the sheet closes the menu.
+  menu.querySelectorAll('a').forEach(function (a) {
+    a.addEventListener('click', function () { setOpen(false) })
+  })
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') setOpen(false)
+  })
+})()
+</script>
+
+<!-- The roster is rendered by the game's own parser and champion registry, so
+     the landing page cannot drift from what the cabinet will actually build.
+     Load order mirrors play.html: utils, config, parser, then the registry. -->
+<script src="js/vendor/ethers.umd.min.js?v=16"></script>
+<script src="js/utils.js?v=16"></script>
+<script src="js/config.js?v=16"></script>
+<script src="js/blockchain.js?v=16"></script>
+<script src="js/wallet.js?v=1"></script>
+<script src="js/prompt-parser.js?v=16"></script>
+<script src="js/characters.js?v=3"></script>
+<script>
+/* Wallet, on the landing page.
+
+   js/wallet.js owns the control now - the same module the cabinet and the
+   champion index use, so all three report the same thing about the same
+   wallet. Nothing on this page reads it: connecting is not a precondition
+   for anything, it just answers "is a wallet actually present" before
+   somebody reaches the cabinet to find out. */
+(function () {
+  if (typeof WalletChip === 'undefined') return
+  WalletChip.mount()
+})()
+</script>
+<script>
+(function () {
+  var host = document.getElementById('roster-grid')
+  if (!host || typeof Characters === 'undefined') return
+  host.innerHTML = Characters.all.map(function (c) { return Characters.cardHTML(c) }).join('')
+})()
+</script>
+
+</body>
+</html>

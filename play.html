@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- ?v= on every local asset: python -m http.server sends no
+     Cache-Control, so browsers happily serve a stale script after
+     an edit. Bump V when you change any js/ or css file. -->
+<title>ENTITY NEXUS Cabinet - Cast A Fighter</title>
+<!-- Every other page has carried the house mark since the logo landed;
+     this one was still asking the browser for a /favicon.ico that does not
+     exist, which showed up as a 404 in the console on every visit. -->
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="styles.css?v=19" />
+<link rel="stylesheet" href="champions.css?v=3" />
+<link rel="stylesheet" href="dialogues.css?v=1" />
+<link rel="stylesheet" href="wallet.css?v=1" />
+</head>
+<body>
+
+<div id="stage-wrap">
+  <div id="stage">
+    <canvas id="arena"></canvas>
+    <canvas id="arena3d" class="hidden"></canvas>
+    <canvas id="pen3d" class="hidden"></canvas>
+    <div id="scanlines"></div>
+
+    <!-- ============ FIGHT HUD ============ -->
+    <div id="hud" class="hidden">
+      <div id="hud-top">
+        <div class="hp-side p1">
+          <!-- #hud-champ-* is the champion's name. It is deliberately NOT
+               #hud-name-*, which rooms.js rewrites to YOU/OPPONENT in an
+               online match - the champion has to survive that. -->
+          <div class="hp-name"><span id="hud-name-1">PLAYER 1</span><b id="hud-champ-1" class="hp-champ"></b><b id="hud-arch-1">BRAWLER</b></div>
+          <div class="hp-track"><div class="hp-chip" id="playerChip"></div><div class="hp-fill" id="playerHealth"></div></div>
+        </div>
+        <div id="hud-timer"><span id="timer">30</span></div>
+        <div class="hp-side p2">
+          <div class="hp-name"><b id="hud-arch-2">TURTLE</b><b id="hud-champ-2" class="hp-champ"></b><span id="hud-name-2">PLAYER 2</span></div>
+          <div class="hp-track rtl"><div class="hp-chip" id="enemyChip"></div><div class="hp-fill" id="enemyHealth"></div></div>
+        </div>
+      </div>
+      <div id="hud-prompts">
+        <div class="hud-prompt p1">&ldquo;<span id="hud-prompt-1"></span>&rdquo;</div>
+        <div class="hud-prompt p2">&ldquo;<span id="hud-prompt-2"></span>&rdquo;</div>
+      </div>
+      <div id="announce"></div>
+      <div id="seed-tag">SEED <span id="seed-val">0</span></div>
+    </div>
+
+    <!-- ============ TITLE ============ -->
+    <section class="screen active" id="screen-title">
+
+      <div class="title-stack">
+        <div class="title-brand">
+          <svg class="title-brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path
+            d="M4 5 L16 27 L28 5" fill="none" stroke="currentColor"
+            stroke-width="3.4" stroke-linejoin="miter"/></svg>
+          <span>ENTITY NEXUS</span>
+        </div>
+        <h1>TRAIN YOUR<br /><em>AI FIGHTER</em></h1>
+        <p class="tagline">Train your AI in 60 seconds,<br />then put it up against someone else&rsquo;s.</p>
+
+        <button class="btn big" id="btn-begin">INSERT COIN</button>
+        <button class="btn ghost" id="btn-3d">VIEW IN 3D</button>
+        <a class="btn ghost" id="btn-spectate" href="spectate.html">SPECTATE &amp; BET</a>
+        <!-- Optional and self-contained: it connects, it says so, and it
+             changes nothing about the fight. The arena screen has had its own
+             CONNECT WALLET all along; this one just means you can do it before
+             you pick a fighter. -->
+        <button class="btn ghost wchip" id="btn-wallet" data-wallet-chip
+                aria-haspopup="true"><i aria-hidden="true"></i><span>CONNECT WALLET</span></button>
+        <div class="hint">No controllers. Nobody touches a key once the bell rings.</div>
+      </div>
+    </section>
+
+    <!-- ============ ROOM ============ -->
+    <!-- One player per screen. The code is the whole handshake: whoever
+         creates a room reads four characters out, the other types them. -->
+    <section class="screen" id="screen-room">
+      <div class="room-stack">
+        <div class="kicker">ONE PLAYER PER SCREEN</div>
+        <h2>FIGHT <em>ONLINE</em></h2>
+        <p class="room-tag">You cast your line on your screen, they cast
+          theirs on theirs. Neither of you sees the other&rsquo;s until both lock in.</p>
+
+        <div class="room-cols">
+          <div class="room-col">
+            <span class="room-lab">CREATE</span>
+            <button class="btn big" id="btn-room-create">CREATE ROOM</button>
+            <div class="room-note">YOU ARE PLAYER 1</div>
+          </div>
+          <div class="room-or"><span>OR</span></div>
+          <div class="room-col">
+            <span class="room-lab">JOIN</span>
+            <input id="in-room-code" class="room-code-in" maxlength="4"
+                   spellcheck="false" autocomplete="off" placeholder="CODE" />
+            <button class="btn" id="btn-room-join">JOIN ROOM</button>
+            <div class="room-note">YOU ARE PLAYER 2</div>
+          </div>
+        </div>
+
+        <div class="room-err" id="room-err"></div>
+        <button class="btn ghost" id="btn-room-local">BOTH PLAYERS ON THIS SCREEN</button>
+        <button class="btn ghost" id="btn-room-back">BACK</button>
+      </div>
+    </section>
+
+    <!-- ============ LOBBY ============ -->
+    <section class="screen" id="screen-lobby">
+      <div class="lobby-stack">
+        <div class="kicker">ROOM CODE</div>
+        <div class="lobby-code" id="lobby-code">&mdash;&mdash;&mdash;&mdash;</div>
+        <div class="lobby-hint" id="lobby-hint">READ THIS CODE TO YOUR OPPONENT</div>
+
+        <div class="lobby-seats">
+          <div class="seat" id="seat-1"><b>PLAYER 1</b><span>WAITING</span></div>
+          <div class="lobby-vs">VS</div>
+          <div class="seat" id="seat-2"><b>PLAYER 2</b><span>WAITING</span></div>
+        </div>
+
+        <!-- Reading four characters across a noisy room works; sending a
+             link works too. Both open the same room. -->
+        <div class="lobby-share" id="lobby-share"></div>
+        <div class="lobby-net" id="lobby-net">NO LINK</div>
+        <!-- Filled by the relay, not by either player: server.js counts its
+             own side-0 subscribers, so nobody can inflate their audience. -->
+        <div class="lobby-crowd" id="lobby-crowd">0 WATCHING</div>
+        <button class="btn ghost" id="btn-lobby-leave">LEAVE ROOM</button>
+      </div>
+    </section>
+
+    <!-- ============ DIALOGUE SELECTION ============
+
+         The screen that used to ask you to WRITE a strategy now asks you to
+         CAST ONE. A dialogue is picked out of the vault (js/dialogues.js),
+         and that line is what the fighter is built from.
+
+         The textarea did not go away and was not replaced: this is still
+         #in-1 / #in-2, it still holds the exact string parsePrompt() scores,
+         and it is still the only thing lock-in, the commit/reveal, the room
+         protocol, the market and the settlement ever read. It is read-only
+         now, so the box cannot disagree with the card you just cast.
+
+         Delete js/dialogues.js, js/dialogue-picker.js and the .dlg-* markup
+         and the cabinet reverts to exactly the free-text game it was. -->
+    <section class="screen" id="screen-prompt">
+      <div class="prompt-head">
+        <span>CAST A DIALOGUE &mdash; <b id="mode-tag">AI FIGHTER</b></span>
+        <div id="prompt-clock"><i id="clock-val">60</i></div>
+        <span class="muted">THE LINE YOU CAST DECIDES THE FIGHT</span>
+      </div>
+      <div class="prompt-grid">
+        <div class="pbox p1" data-side="1">
+          <header>PLAYER 1 <b class="dot"></b></header>
+
+          <!-- Language tabs + a one-tap shortlist, built by js/ui.js from
+               the vault. Adding a language to js/dialogues.js is enough for
+               a tab to appear here. -->
+          <div class="dlg-tabs" data-dlg-tabs="1"></div>
+          <div class="dlg-quick" data-dlg-quick="1"></div>
+
+          <button class="dlg-open" type="button" data-dlg-open="1">
+            <b>Open the Dialogue Vault</b>
+            <span>25 lines &middot; Hindi, English, Tamil, Telugu, Korean</span>
+          </button>
+
+          <textarea id="in-1" spellcheck="false" readonly
+            aria-label="The dialogue this fighter is built from"
+            placeholder="No dialogue cast yet &mdash; open the vault"></textarea>
+          <div class="wc" id="wc-1">0 / 200 WORDS</div>
+          <button class="champ-open" type="button" data-champ="1">or field a champion</button>
+          <div class="readout">
+            <div class="arch" id="arch-1">&mdash;</div>
+            <div class="bars" id="bars-1"></div>
+            <div class="chips" id="chips-1"></div>
+          </div>
+          <button class="btn lock" data-lock="1">LOCK IN</button>
+        </div>
+
+        <div class="vs-col"><span>VS</span></div>
+
+        <div class="pbox p2" data-side="2">
+          <header><b class="dot"></b> PLAYER 2</header>
+
+          <div class="dlg-tabs" data-dlg-tabs="2"></div>
+          <div class="dlg-quick" data-dlg-quick="2"></div>
+
+          <button class="dlg-open" type="button" data-dlg-open="2">
+            <b>Open the Dialogue Vault</b>
+            <span>25 lines &middot; Hindi, English, Tamil, Telugu, Korean</span>
+          </button>
+
+          <textarea id="in-2" spellcheck="false" readonly
+            aria-label="The dialogue this fighter is built from"
+            placeholder="No dialogue cast yet &mdash; open the vault"></textarea>
+          <div class="wc" id="wc-2">0 / 200 WORDS</div>
+          <button class="champ-open" type="button" data-champ="2">or field a champion</button>
+          <div class="readout">
+            <div class="arch" id="arch-2">&mdash;</div>
+            <div class="bars" id="bars-2"></div>
+            <div class="chips" id="chips-2"></div>
+          </div>
+          <button class="btn lock" data-lock="2">LOCK IN</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ANALYZING ============ -->
+    <section class="screen" id="screen-analyze">
+      <div class="analyze-stack">
+        <div class="spinner"></div>
+        <h2>READING THE LINES</h2>
+        <div id="analyze-log"></div>
+      </div>
+    </section>
+
+    <!-- ============ REVEAL ============ -->
+    <section class="screen" id="screen-reveal">
+      <div class="reveal-grid">
+        <div class="card p1" id="card-1"></div>
+        <div class="reveal-vs"><span>VS</span><em id="reveal-go">FIGHT!</em></div>
+        <div class="card p2" id="card-2"></div>
+      </div>
+    </section>
+
+    <!-- ============ ARENA - public strategies, then the market ============
+
+         The order on this screen is the product: both strategies are shown
+         FIRST, frozen and read back from the contract, and only then does the
+         betting panel appear. A market that opened before the crowd could
+         read what it was backing would be a different product entirely.
+    ================================================================= -->
+    <section class="screen" id="screen-arena">
+      <div class="arena-stack">
+        <div class="arena-top">
+          <h2>MATCH <span id="arena-match">#&mdash;</span></h2>
+          <div class="arena-state" id="arena-state">WAITING FOR AGENTS</div>
+          <div class="chain-state" id="arena-chain-state">checking chain...</div>
+          <div class="arena-wallet">
+            <button class="btn ghost sm" id="btn-arena-connect">CONNECT WALLET</button>
+            <code id="arena-wallet">&mdash;</code>
+          </div>
+        </div>
+
+        <!-- Both strategies, public and immutable, before any money moves. -->
+        <div class="agent-grid">
+          <div class="agent-card side-a">
+            <div class="ag-side">AGENT A</div>
+            <div class="ag-body" id="agent-A"></div>
+          </div>
+          <div class="agent-vs">VS</div>
+          <div class="agent-card side-b">
+            <div class="ag-side">AGENT B</div>
+            <div class="ag-body" id="agent-B"></div>
+          </div>
+        </div>
+        <div class="agent-note">
+          You are betting on these exact agent snapshots. The prompt, model,
+          model version, JEV config and simulation version are frozen on
+          Monad and cannot change once betting opens.
+        </div>
+
+        <!-- The economics, never hidden. -->
+        <div class="pool-grid">
+          <div class="pool-cell"><span>TOTAL POOL</span><b id="pool-total">0 MON</b></div>
+          <div class="pool-cell"><span>SIDE A</span><b id="pool-a">0 MON</b></div>
+          <div class="pool-cell"><span>SIDE B</span><b id="pool-b">0 MON</b></div>
+          <div class="pool-cell"><span>PLATFORM FEE</span><b id="pool-fee">5.0%</b></div>
+          <div class="pool-cell wide"><span>DISTRIBUTABLE TO WINNERS</span><b id="pool-dist">0 MON</b></div>
+        </div>
+        <div class="pool-note" id="pool-note"></div>
+
+        <div class="bet-form" id="bet-form">
+          <div class="bet-sides">
+            <button class="btn side-btn" id="btn-bet-a">BET ON A</button>
+            <button class="btn side-btn" id="btn-bet-b">BET ON B</button>
+          </div>
+          <div class="bet-row">
+            <input id="bet-amount" type="number" step="0.001" min="0" placeholder="0.05" />
+            <span class="bet-unit">MON</span>
+            <button class="btn gold" id="btn-bet-place">PLACE BET</button>
+          </div>
+          <div class="bet-quote" id="bet-quote"></div>
+          <div class="bet-mine" id="bet-mine"></div>
+          <div class="bet-countdown" id="bet-countdown"></div>
+        </div>
+
+        <div class="arena-actions">
+          <button class="btn ghost sm" id="btn-arena-create">OPEN MATCH ON MONAD</button>
+          <button class="btn ghost sm" id="btn-bet-close">CLOSE BETTING</button>
+          <button class="btn gold sm hidden" id="btn-arena-claim">CLAIM</button>
+        </div>
+
+        <div class="arena-log" id="arena-log"></div>
+      </div>
+    </section>
+
+    <!-- ============ THE MARKET ============
+         Between the reveal and the bell. The fight does not start until a
+         backer is on each side, so this is where two players wait and watch
+         the crowd arrive. Driven by js/chain-room.js; the server owns every
+         transaction behind it, which is why neither player needs a wallet
+         to be standing here. -->
+    <section class="screen" id="screen-market">
+      <div class="mk-stack">
+        <h2>MARKET OPEN <span id="mk-match">#&mdash;</span></h2>
+        <div class="mk-status" id="mk-status">opening a match&hellip;</div>
+
+        <div class="mk-fighters">
+          <div class="mk-f" id="mk-f1">
+            <span class="mk-seat">PLAYER 1</span>
+            <b class="mk-arch">&mdash;</b>
+            <q class="mk-prompt"></q>
+            <div class="mk-pool"><span>backed</span><b id="mk-pool-1">0 MON</b></div>
+          </div>
+          <div class="mk-vs">VS</div>
+          <div class="mk-f" id="mk-f2">
+            <span class="mk-seat">PLAYER 2</span>
+            <b class="mk-arch">&mdash;</b>
+            <q class="mk-prompt"></q>
+            <div class="mk-pool"><span>backed</span><b id="mk-pool-2">0 MON</b></div>
+          </div>
+        </div>
+
+        <div class="mk-bar"><i id="mk-bar-1"></i><i id="mk-bar-2"></i></div>
+
+        <p class="mk-need" id="mk-need">
+          This fight starts when at least one person backs each fighter.
+        </p>
+
+        <div class="mk-clockrow">
+          <span>betting closes in</span>
+          <b id="mk-clock">&mdash;</b>
+        </div>
+
+        <div class="mk-share">
+          <span>Send this to anyone who should bet:</span>
+          <a id="mk-link" href="#" target="_blank" rel="noopener">&mdash;</a>
+        </div>
+
+        <p class="mk-fine">
+          Neither of you needs a wallet: every transaction is the arbiter's, and
+          there are no player stakes &mdash; the betting pool is the only money in
+          the match. If the window closes with a side unbacked, everyone who did
+          bet is refunded and a fresh market opens.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ WINNER ============ -->
+    <section class="screen" id="screen-winner">
+      <div class="win-stack">
+        <div class="win-kicker" id="win-how">K.O.</div>
+        <h2 id="win-title">PLAYER 1 WINS</h2>
+        <div class="win-arch" id="win-arch">THE BERSERKER</div>
+        <!-- Filled when the winning strategy is one of the champions. -->
+        <div class="win-champ" id="win-champ" hidden></div>
+        <div class="win-record" id="win-record" hidden></div>
+        <!-- Points, booked after the round for both fighters. A separate
+             block on purpose: #win-summary is the round's numbers and its
+             six rows are a contract with the rest of the UI. -->
+        <div class="win-points" id="win-points" hidden></div>
+        <blockquote id="win-prompt"></blockquote>
+        <div class="bars wide" id="win-bars"></div>
+        <!-- The round, in numbers. Filled from the simulation's own counters;
+             empty and collapsed when there is nothing to report. -->
+        <dl class="win-summary" id="win-summary"></dl>
+        <div class="win-actions">
+          <button class="btn gold" id="btn-mint">SETTLE ON MONAD &amp; MINT</button>
+          <button class="btn ghost" id="btn-again">REMATCH</button>
+          <button class="btn ghost" id="btn-new">NEW FIGHTERS</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MINT ============ -->
+    <section class="screen" id="screen-mint">
+      <div class="mint-stack">
+        <h2 id="mint-title">SETTLING ON MONAD</h2>
+        <div id="mint-log"></div>
+        <div id="mint-result" class="hidden">
+          <div class="mint-badge">SETTLED ON MONAD</div>
+          <div class="mint-row"><span>TX</span><code id="mint-tx">&mdash;</code></div>
+          <div class="mint-row"><span>TOKEN</span><code id="mint-token">&mdash;</code></div>
+          <!-- The simulated-mint chip is gone with the simulated mint. This
+               screen now only ever shows a real transaction hash. -->
+          <div class="sim-chip hidden" id="sim-chip"></div>
+          <button class="btn ghost" id="btn-mint-back">BACK</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HEX RACER (PRACTICE) ============ -->
+    <!-- The prompt practice range. The other two modes put your words up
+         against another player's; this one puts them up against a distance
+         and a clock, which never argues and never gets lucky. You write the
+         ship, the ship is what you fly, and the run answers one question:
+         was that prompt worth the time it asked for? -->
+
+  </div>
+
+  <!-- Lives outside #stage's screen stack: HexGL renders its own canvas at
+       its own pixel size and must not inherit the stage transform. It is
+       shown over the whole stage-wrap while a run is live. -->
+</div>
+
+<div id="mute" title="Mute (M)">&#9835;</div>
+
+<!-- Optional pickers. Both stay empty and hidden until js/champions.js or
+     js/dialogue-picker.js opens one, and both only ever write text into the
+     existing textarea - no screen, lock, commit or fight behaviour depends
+     on either. -->
+<div id="champ-overlay" class="champ-overlay" hidden aria-hidden="true"></div>
+<div id="dlg-overlay" class="dlg-overlay" hidden aria-hidden="true"></div>
+
+<script src="js/vendor/gsap.min.js?v=16"></script>
+<script src="js/utils.js?v=16"></script>
+<script src="js/config.js?v=16"></script>
+<script src="js/classes.js?v=17"></script>
+<script src="js/prompt-parser.js?v=16"></script>
+<!-- The champion registry. Pure data plus a card renderer; its stats come
+     from parsePrompt() above, so the picker cannot disagree with the fight. -->
+<script src="js/characters.js?v=3"></script>
+<!-- The dialogue vault: 25 film lines, each scored by the parser above and
+     each carrying the render-only look (hue + accent) its fighter wears.
+     Pure data plus a card renderer, like characters.js. -->
+<script src="js/dialogues.js?v=1"></script>
+<script src="js/gemini.js?v=16"></script>
+<script src="js/jev.js?v=17"></script>
+<script src="js/ai-controller.js?v=16"></script>
+<script src="js/fx.js?v=16"></script>
+<script src="js/scene3d.js?v=16"></script>
+<script src="js/game.js?v=16"></script>
+<!-- ethers was vendored but never loaded here, which quietly made every
+     wallet path in blockchain.js a no-op: connectWallet() found no `ethers`,
+     left signer null and carried on. It has to come first. -->
+<script src="js/vendor/ethers.umd.min.js?v=16"></script>
+<script src="js/blockchain.js?v=16"></script>
+<!-- The wallet chip. Loaded after blockchain.js (it is a view over Chain)
+     and before ui.js, which mounts it. -->
+<script src="js/wallet.js?v=1"></script>
+<!-- ArenaBattle's spectator side. The cabinet itself does not bet, but it
+     publishes the two fighter addresses that spectators bet ON, and shares
+     one copy of the payout arithmetic with spectate.html. -->
+<script src="js/betting.js?v=17"></script>
+<script src="js/arena.js?v=17"></script>
+<script src="js/vendor/three.min.js?v=16"></script>
+<script src="js/vendor/GLTFLoader.js?v=16"></script>
+<!-- post-processing chain: shaders, then EffectComposer, THEN the passes.
+
+     EffectComposer.js is the file that defines the THREE.Pass base class and
+     THREE.FullScreenQuad, and every pass below does `class X extends
+     THREE.Pass` at LOAD time. It used to be loaded after ShaderPass and
+     MaskPass, so both of those died on "Class extends value undefined",
+     EffectComposer then refused to build ("relies on THREE.ShaderPass"), and
+     the whole composer threw - which the 3D renderers catch, so the only
+     visible symptom was that bloom silently never happened. -->
+<script src="js/vendor/CopyShader.js?v=16"></script>
+<script src="js/vendor/LuminosityHighPassShader.js?v=16"></script>
+<script src="js/vendor/EffectComposer.js?v=16"></script>
+<script src="js/vendor/ShaderPass.js?v=16"></script>
+<script src="js/vendor/MaskPass.js?v=16"></script>
+<script src="js/vendor/RenderPass.js?v=16"></script>
+<script src="js/vendor/UnrealBloomPass.js?v=16"></script>
+<script src="js/render3d.js?v=16"></script>
+<!-- Pen Fight: the simulation is standalone (?penbench=N needs no renderer),
+     the renderer bolts onto it. Both after three.js, both before ui.js. -->
+<!-- Hex Racer: a standalone game in an iframe. Only needs FX and UI, so
+     it loads last alongside ui.js. -->
+<script src="js/ui.js?v=19"></script>
+<!-- Strictly after ui.js: these open on a click, render their cards, and hand
+     the choice to the cabinet by dispatching `input` on the textarea. -->
+<script src="js/champions.js?v=1"></script>
+<script src="js/dialogue-picker.js?v=1"></script>
+<!-- Rooms: one player per browser, joined by a 4-character code.
+
+     Strictly after ui.js. rooms.js wraps six UI methods rather than editing
+     them, so UI must exist and have run its init by the time it loads. -->
+<script src="js/net.js?v=16"></script>
+<!-- After net.js (it hooks Net.onServerEvent through rooms.js) and before
+     rooms.js, which calls into it from the beginFight gate. -->
+<script src="js/chain-room.js?v=18"></script>
+<!-- Puts the room on the public board at /spectate.html. Strictly between
+     net.js and rooms.js: it reads Net, and rooms.js drives it. -->
+<script src="js/arena-feed.js?v=16"></script>
+<script src="js/rooms.js?v=16"></script>
+</body>
+</html>

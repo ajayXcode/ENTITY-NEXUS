@@ -1,0 +1,9 @@
+{
+  "chainId": 10143,
+  "arenaAddress": "0x0329D1A516e9F5f8a89B48C4AD0515884f0652a5",
+  "nftAddress": "0xD12205ea18E336F2a4995Cc0Ef6226efaC48639F",
+  "arbiter": "0x1F9326384C92d29915fd4EDD22797C3E664Dc651",
+  "deployer": "0xc2c7c68319eaCc15a86a70Ad83A11Ef7B65831b9",
+  "feeBps": 500,
+  "deployedAt": "2026-09-19T08:44:58.631Z"
+}

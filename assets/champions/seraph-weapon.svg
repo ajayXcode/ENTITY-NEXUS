@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 64" role="img" aria-label="Halo glaive">
+<circle cx="18" cy="32" r="13" fill="none" stroke="#fcd34d" stroke-width="2.6"/>
+    <path d="M18 22 v20 M8 32 h20" stroke="#fcd34d" stroke-width="1.8"/>
+    <rect x="30" y="30" width="42" height="4" rx="2" fill="#cfd6e0"/>
+    <path d="M70 8 Q104 20 110 32 Q104 44 70 56 Q84 32 70 8 Z" fill="#fcd34d"/>
+    <path d="M70 8 Q84 32 70 56" fill="none" stroke="#cfd6e0" stroke-width="2.2"/>
+</svg>

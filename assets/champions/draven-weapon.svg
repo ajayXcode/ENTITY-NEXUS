@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 64" role="img" aria-label="Tower shield, broadsword">
+<path d="M12 10 h28 v44 h-28 z" fill="none" stroke="#fb7185" stroke-width="3"/>
+    <path d="M16 32 L26 21 L36 32" fill="none" stroke="#fb7185" stroke-width="3"/>
+    <path d="M46 28 L106 30 L118 32 L106 34 L46 36 Z" fill="#cfd6e0"/>
+    <rect x="44" y="21" width="6" height="22" rx="2" fill="#fb7185"/>
+</svg>

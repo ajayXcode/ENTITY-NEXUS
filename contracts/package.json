@@ -1,0 +1,16 @@
+{
+  "name": "train-your-ai-fighter-contracts",
+  "version": "1.0.0",
+  "description": "Smart contracts for Train Your AI Fighter on Monad Testnet (Arena Staking, Spectator Betting & On-Chain SVG NFT)",
+  "scripts": {
+    "test": "hardhat test",
+    "compile": "hardhat compile",
+    "deploy:monad": "hardhat run scripts/deploy.js --network monadTestnet"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.0.2",
+    "dotenv": "^16.4.5",
+    "hardhat": "^2.22.5"
+  }
+}

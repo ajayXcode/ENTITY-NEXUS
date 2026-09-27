@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Spectate &mdash; ENTITY NEXUS</title>
+<meta name="description" content="Every ENTITY NEXUS match happening right now. Watch a fight you are not in, and back a fighter on Monad." />
+<meta name="theme-color" content="#05060a" />
+
+<meta property="og:title" content="ENTITY NEXUS — Spectate" />
+<meta property="og:description" content="Watch every live match. Back a fighter on Monad." />
+<meta property="og:type" content="website" />
+
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+<!-- site.css carries the band tokens (--fg, --hair, --accent...) that every
+     component below reads. spectate.css only adds what is new to this page. -->
+<link rel="stylesheet" href="site.css?v=5" />
+<link rel="stylesheet" href="spectate.css?v=5" />
+</head>
+<body class="spec-body">
+
+<div class="grain" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+
+<header class="nav stuck" id="nav">
+  <a class="brand" href="index.html" aria-label="ENTITY NEXUS - home">
+    <svg class="brand-v" viewBox="0 0 32 32" aria-hidden="true"><path
+      d="M4 5 L16 27 L28 5" fill="none" stroke="currentColor"
+      stroke-width="3.4" stroke-linejoin="miter"/></svg>
+    <span class="brand-name">ENTITY NEXUS</span>
+  </a>
+
+  <nav class="nav-links" aria-label="Sections">
+    <a href="champions.html">Champions</a>
+    <a href="dialogues.html">Vault</a>
+    <a href="matchup.html">Lab</a>
+    <a href="index.html#cabinet">Cabinet</a>
+    <a href="index.html#floor">Floor</a>
+    <a href="index.html#chain">Chain</a>
+  </nav>
+
+  <a class="btn btn-gold nav-cta" href="play.html">Insert coin</a>
+</header>
+
+<main class="band band-dark spec-main" id="top">
+  <div class="wrap">
+
+    <!-- ============ HEAD ============ -->
+    <header class="sec-head spec-head">
+      <div class="eyebrow"><i>Live</i> The floor</div>
+      <h2>SPECTATE<br /><em>&amp; BACK</em></h2>
+      <p class="sec-note">
+        Every room on this server, as it happens. Pick a fight you are not in,
+        watch both cast lines come out of commit, and put <code>MON</code>
+        behind one of them.
+        Bets run as a pari&#8209;mutuel pool on <code>ArenaBattle</code>:
+        back the winner and your stake comes back plus a share of the losing
+        pool, minus the 5% protocol fee.
+      </p>
+    </header>
+
+    <!-- The one bar that says what mode this page is really in. It is the
+         first thing a judge should be able to read: live on Monad, or paper. -->
+    <div class="spec-status panel" id="spec-status">
+      <div class="ss-cell">
+        <dt>Network</dt>
+        <dd id="ss-net">CHECKING&hellip;</dd>
+      </div>
+      <div class="ss-cell">
+        <dt>Arena contract</dt>
+        <dd><code id="ss-arena">&mdash;</code></dd>
+      </div>
+      <div class="ss-cell">
+        <dt>Live matches</dt>
+        <dd><b id="ss-count">0</b></dd>
+      </div>
+      <div class="ss-cell ss-wallet">
+        <dt>Wallet</dt>
+        <dd><code id="ss-wallet">NOT CONNECTED</code></dd>
+        <button class="btn btn-sm btn-ghost" id="btn-connect">CONNECT</button>
+      </div>
+    </div>
+
+    <!-- ============ THE FLOOR ============ -->
+    <div class="spec-grid">
+
+      <!-- ---- left: every match on the board ---- -->
+      <section class="spec-list panel" aria-label="Live matches">
+        <div class="panel-bar">
+          <span>The board</span>
+          <span id="board-tick">&mdash;</span>
+        </div>
+        <div id="match-list" class="ml"></div>
+        <p class="cap" id="board-empty">
+          Nothing is running yet. Open <a href="play.html">the cabinet</a>,
+          create a room, and it appears here the moment it has a code.
+        </p>
+      </section>
+
+      <!-- ---- right: the one you picked ---- -->
+      <section class="spec-detail" aria-label="Selected match" id="detail">
+        <div class="panel spec-empty" id="detail-empty">
+          <div class="se-mark" aria-hidden="true"></div>
+          <h3>PICK A FIGHT</h3>
+          <p>Choose a match on the left to watch it and to see the pools.
+             Both prompts stay hidden until the two players have committed
+             &mdash; the board will not show you a strategy its opponent
+             cannot see.</p>
+        </div>
+
+        <div class="panel detail-card hidden" id="detail-card">
+          <div class="panel-bar">
+            <span>Room <b id="d-code">&mdash;&mdash;&mdash;&mdash;</b></span>
+            <span id="d-status">&mdash;</span>
+          </div>
+
+          <!-- What a house match is, said where the bet is placed rather
+               than in a footnote. See paintHouseNote in js/spectate.js. -->
+          <div class="d-house hidden" id="d-house">
+            <b>HOUSE MATCH</b>
+            <span id="dh-what"></span>
+            <p>
+              Seated and run by this server, so there are no two players to
+              agree on the result &mdash; the server reports it and the
+              arbiter signs that one report. The fight is the real engine on
+              a seed <code>ArenaBattle</code> produced after betting closed,
+              and the pools, the payouts and the claim are the same ones
+              every other match on this board uses.
+            </p>
+          </div>
+
+          <!-- the two fighters -->
+          <div class="d-fighters">
+            <article class="d-fighter p1" id="d-f1">
+              <header><span class="d-tag">Player 1</span><b class="d-arch">&mdash;</b></header>
+              <div class="d-bars"></div>
+              <q class="d-prompt"></q>
+              <code class="d-addr">&mdash;</code>
+            </article>
+
+            <div class="d-vs"><span>VS</span></div>
+
+            <article class="d-fighter p2" id="d-f2">
+              <header><span class="d-tag">Player 2</span><b class="d-arch">&mdash;</b></header>
+              <div class="d-bars"></div>
+              <q class="d-prompt"></q>
+              <code class="d-addr">&mdash;</code>
+            </article>
+          </div>
+
+          <!-- ============ THE FIGHT ============
+               Hidden until a fight is actually running in this room. The
+               canvas itself is NOT created on demand: js/game.js looks for
+               #arena the moment it loads and builds both fighters against
+               it, so it has to be in the document from the start. -->
+          <div class="d-fight hidden" id="fight-wrap">
+            <div class="fh" id="fight-hud">
+              <div class="fh-side fh-1">
+                <b id="fh-name1">PLAYER 1</b>
+                <div class="fh-bar"><i id="fh-hp1" style="width:100%"></i></div>
+              </div>
+              <div class="fh-clock" id="fh-clock">&mdash;</div>
+              <div class="fh-side fh-2">
+                <b id="fh-name2">PLAYER 2</b>
+                <div class="fh-bar"><i id="fh-hp2" style="width:100%"></i></div>
+              </div>
+            </div>
+            <div class="fh-stage">
+              <canvas id="arena" width="1024" height="576"></canvas>
+            </div>
+            <div class="fh-foot">
+              <span class="cap">
+                Running on this page from the seed the contract produced &mdash;
+                not a stream. Your screen reaches the result on its own.
+              </span>
+              <button type="button" class="btn btn-sm btn-ghost" id="btn-sound"
+                      aria-pressed="false">SOUND OFF</button>
+              <button type="button" class="btn btn-sm btn-ghost" id="btn-fullscreen"
+                      aria-pressed="false">FULL SCREEN</button>
+            </div>
+          </div>
+
+          <!-- Why nothing is happening yet, and what would change it.
+               Painted by paintGate() in js/spectate.js. -->
+          <p class="d-gate hidden" id="d-gate"></p>
+
+          <!-- the pool -->
+          <div class="d-pool">
+            <div class="dp-head">
+              <span>Spectator pool</span>
+              <b id="dp-total">0 MON</b>
+            </div>
+            <div class="dp-bar" id="dp-bar">
+              <i class="dp-p1" style="width:50%"></i><i class="dp-p2" style="width:50%"></i>
+            </div>
+            <div class="dp-legend">
+              <span class="l1"><b id="dp-1">0</b> MON &middot; <i id="dp-1x">1.00x</i></span>
+              <span class="l2"><i id="dp-2x">1.00x</i> &middot; <b id="dp-2">0</b> MON</span>
+            </div>
+          </div>
+
+          <!-- the bet -->
+          <form class="d-bet" id="d-bet" autocomplete="off">
+            <div class="db-sides" role="group" aria-label="Which fighter to back">
+              <button type="button" class="db-side on" data-side="p1">
+                <span>Back</span><b id="db-name1">PLAYER 1</b>
+              </button>
+              <button type="button" class="db-side" data-side="p2">
+                <span>Back</span><b id="db-name2">PLAYER 2</b>
+              </button>
+            </div>
+
+            <div class="db-amount">
+              <label for="bet-amt">Amount</label>
+              <div class="db-in">
+                <input id="bet-amt" type="text" inputmode="decimal" value="0.05" spellcheck="false" />
+                <span>MON</span>
+              </div>
+              <div class="db-chips">
+                <button type="button" data-amt="0.01">0.01</button>
+                <button type="button" data-amt="0.05">0.05</button>
+                <button type="button" data-amt="0.1">0.1</button>
+                <button type="button" data-amt="0.5">0.5</button>
+              </div>
+            </div>
+
+            <!-- The quote is the contract's own formula, run on the pools as
+                 they stand this second. It moves as the amount is typed
+                 because the bet dilutes the pool it joins. -->
+            <dl class="db-quote" id="db-quote">
+              <div><dt>If they win</dt><dd><b id="q-payout">&mdash;</b> MON</dd></div>
+              <div><dt>Profit</dt><dd><b id="q-profit">&mdash;</b> MON</dd></div>
+              <div><dt>Return</dt><dd><b id="q-mult">&mdash;</b></dd></div>
+            </dl>
+
+            <button class="btn btn-gold btn-lg db-go" id="btn-bet" type="submit">PLACE BET</button>
+            <p class="db-note" id="db-note"></p>
+          </form>
+
+          <!-- your position, and the claim once it settles -->
+          <div class="d-mine hidden" id="d-mine">
+            <div class="dm-row"><span>Your position</span><b id="dm-pos">&mdash;</b></div>
+            <div class="dm-row" id="dm-owed-row"><span>Owed</span><b id="dm-owed">&mdash;</b></div>
+            <button class="btn btn-gold db-go hidden" id="btn-claim" type="button">CLAIM PAYOUT</button>
+          </div>
+
+          <!-- live room events, straight off the relay -->
+          <div class="d-feed">
+            <div class="panel-bar"><span>Room feed</span><span id="d-crowd">&mdash;</span></div>
+            <div id="feed-log" class="fl"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ YOUR BETS ============
+         Every match this wallet has money in, read from the chain rather
+         than from the board - so a payout is still claimable long after
+         the match it belongs to has scrolled off the floor. -->
+    <section class="my-bets panel hidden" id="my-bets" aria-label="Your bets">
+      <div class="panel-bar">
+        <span>Your bets</span>
+        <button class="btn btn-sm btn-ghost" id="mb-refresh">REFRESH</button>
+      </div>
+      <p class="cap" id="mb-note">Connect a wallet to see the bets it has placed.</p>
+      <div id="mb-list" class="mb"></div>
+    </section>
+
+    <!-- ============ HOW THE POOL PAYS ============ -->
+    <section class="spec-rules" aria-label="How the pool pays">
+      <h3>HOW THE POOL PAYS</h3>
+      <ol class="sr-steps">
+        <li>
+          <b>Both fighters stake.</b>
+          <span>Equal stakes into <code>ArenaBattle</code>. The winner takes
+            1.5&times; their stake, the loser gets half of theirs back &mdash;
+            losing costs you half, not everything.</span>
+        </li>
+        <li>
+          <b>The crowd backs a side.</b>
+          <span>Every bet joins that fighter&rsquo;s pool. Betting stays open
+            until the match settles, and the two players may not bet on
+            themselves.</span>
+        </li>
+        <li>
+          <b>Settlement splits the losing pool.</b>
+          <span>5% goes to the protocol. The other 95% is shared across the
+            winning pool in proportion to each bet.</span>
+        </li>
+        <li>
+          <b>You claim it yourself.</b>
+          <span>Payouts are pull&#8209;based: <code>claimSpectatorPayout()</code>
+            returns your stake <em>plus</em> your share. Back the winner and
+            your principal always comes back.</span>
+        </li>
+      </ol>
+      <p class="cap">
+        If nobody backed the winner, the losing side is refunded in full
+        instead &mdash; no one is paid out of an empty pool. If nobody backed
+        the loser, there is no profit to share and winning bets simply return
+        their stake.
+      </p>
+    </section>
+
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-grid">
+    <div class="foot-brand"><svg class="brand-v" viewBox="0 0 32 32"
+      aria-hidden="true"><path d="M4 5 L16 27 L28 5" fill="none" stroke="currentColor"
+      stroke-width="3.4" stroke-linejoin="miter"/></svg> ENTITY NEXUS</div>
+    <!-- These used to point at ?mode=pen and ?mode=hexgl, two modes this
+         build does not have: js/ui.js defines MODES.fighter and nothing
+         else, so setMode() ignored both and the links quietly did nothing. -->
+    <nav class="foot-links" aria-label="Pages">
+      <a href="play.html">The cabinet</a>
+      <a href="champions.html">Champion index</a>
+      <a href="matchup.html">Matchup lab</a>
+      <a href="index.html">Home</a>
+    </nav>
+    <div class="foot-note">Built on Monad</div>
+  </div>
+</footer>
+
+<!-- ethers first: betting.js reads ArenaBattle through it, and blockchain.js
+     wants it the moment a wallet is connected. -->
+<script src="js/vendor/ethers.umd.min.js?v=5"></script>
+<script src="js/utils.js?v=5"></script>
+<script src="js/config.js?v=5"></script>
+<script src="js/prompt-parser.js?v=5"></script>
+<!-- Presentation only: the floor names whatever is behind a revealed line,
+     champion or vault dialogue. js/spectate.js guards every use, so the page
+     works without either. -->
+<script src="js/characters.js?v=3"></script>
+<script src="js/dialogues.js?v=1"></script>
+<script src="js/blockchain.js?v=5"></script>
+<script src="js/jev.js?v=17"></script>
+<script src="js/betting.js?v=5"></script>
+<script src="js/mybets.js?v=18"></script>
+
+<!-- The fight engine, exactly as play.html loads it, because a spectator
+     watches the real thing rather than a recording of it (see the header of
+     js/spectate-fight.js).
+
+     Two deliberate omissions from play.html's list:
+
+       js/ui.js      the whole cabinet - screen flow, prompt boxes, mint
+                     dialogs - none of which exists on this page. It also
+                     declares `const $`, which would collide with the `$`
+                     js/spectate.js defines and take the page down with a
+                     syntax error. spectate-fight.js supplies the three UI
+                     methods the engine actually calls.
+       js/net.js     rooms, commit-reveal, round nonces. A spectator is side
+                     0 and the relay refuses to carry anything it posts, so
+                     there is nothing here for it to do.
+
+     spectate-fight.js loads BEFORE game.js: game.js starts its render loop
+     on its last line, and the first tick calls UI.updateFightHud(). -->
+<script src="js/classes.js?v=5"></script>
+<script src="js/ai-controller.js?v=5"></script>
+<script src="js/fx.js?v=5"></script>
+<script src="js/scene3d.js?v=5"></script>
+<script src="js/spectate-fight.js?v=5"></script>
+<script src="js/game.js?v=5"></script>
+
+<script src="js/spectate.js?v=6"></script>
+</body>
+</html>

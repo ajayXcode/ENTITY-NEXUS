@@ -1,0 +1,489 @@
+/* ------------------------------------------------------------------
+   champions.css - the champion design-sheet cards and the cabinet's
+   champion picker.
+
+   Shared by two pages on purpose:
+
+     index.html   the public roster band        (.en-roster-grid)
+     play.html    the optional picker overlay   (.champ-grid)
+
+   Both render the same markup from js/characters.js, so the card on the
+   landing page and the card you pick in the cabinet are literally the same
+   component. The stats on them come from the game's own parsePrompt().
+------------------------------------------------------------------- */
+
+/* ================= the card ================= */
+
+.ch-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px 20px 20px 22px;
+  background: linear-gradient(160deg, #0c0e13 0%, #080a0e 100%);
+  border: 1px solid #1b1f27;
+  overflow: hidden;
+  transition: border-color .25s ease, transform .25s ease;
+}
+.ch-card:hover { border-color: #2d3340; }
+
+/* the accent rail down the left edge - the only colour the sheet leans on */
+.ch-rail {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--ch-accent, #888);
+}
+
+.ch-head { position: relative; display: flex; align-items: flex-start; gap: 12px; }
+.ch-head-txt { min-width: 0; }
+
+/* the printed crest, straight out of the asset pack */
+.ch-crest {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  display: block;
+}
+
+/* the WEAPONS panel: the glyph drawing, on its own strip */
+.ch-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border: 1px solid #171b22;
+  background: rgba(255,255,255,.015);
+}
+.ch-weapon {
+  display: block;
+  width: 100%;
+  max-width: 190px;
+  height: 44px;
+  object-fit: contain;
+}
+
+/* the session win/loss chip */
+.ch-record {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #7c8595;
+}
+.ch-record[hidden] { display: none; }
+.ch-record b {
+  font-size: 13px;
+  color: #fff;
+  font-weight: 700;
+}
+.ch-record em { font-style: normal; color: #5d6675; margin-right: 6px; }
+.ch-record .ch-lab { margin-right: 2px; }
+.ch-record [data-rec-p] { color: var(--ch-accent, #fff); }
+
+/* Battle art. Only the champions that ship their own sprites get one - a
+   portrait of a hue-rotate filter would be a lie, so the rest keep the
+   crest and this block is simply absent from their cards. */
+.ch-art {
+  margin: 12px 0 0;
+  display: grid;
+  gap: 6px;
+}
+.ch-art img {
+  width: 100%;
+  height: auto;
+  display: block;
+  background:
+    radial-gradient(circle at 50% 78%, rgba(255, 255, 255, 0.07), transparent 62%),
+    #0a0d14;
+  border: 1px solid #171b22;
+}
+.ch-art figcaption {
+  font-size: 9px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: #5d6675;
+}
+
+.ch-tier {
+  display: inline-block;
+  font-size: 9px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--ch-accent, #888);
+  margin-bottom: 6px;
+}
+
+.ch-name {
+  margin: 0;
+  font-size: 1.375rem;
+  line-height: 1;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.ch-title {
+  margin: 6px 0 0;
+  font-size: 10px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #7c8595;
+}
+
+/* SPECIES / STYLE / WEAPONS / ROLE / TRAITS - the sheet's table */
+.ch-spec {
+  margin: 0;
+  display: grid;
+  gap: 5px;
+  border-top: 1px solid #171b22;
+  border-bottom: 1px solid #171b22;
+  padding: 12px 0;
+}
+.ch-spec > div {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 10px;
+  align-items: baseline;
+}
+.ch-spec dt {
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #5d6675;
+}
+.ch-spec dd {
+  margin: 0;
+  font-size: 11px;
+  color: #d7dde7;
+  line-height: 1.45;
+}
+
+/* colour palette strip */
+.ch-pal { display: flex; align-items: center; gap: 10px; }
+.ch-lab {
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #5d6675;
+}
+.ch-swatches { display: flex; gap: 5px; }
+.ch-swatches i {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(255,255,255,.14);
+}
+
+/* the numbers the fight will actually use */
+.ch-derived {
+  margin-top: auto;
+  display: grid;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid #171b22;
+}
+.ch-arch {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ch-arch span {
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #5d6675;
+}
+.ch-arch b {
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ch-accent, #fff);
+}
+
+.ch-bars { display: grid; gap: 5px; }
+.ch-bar {
+  display: grid;
+  grid-template-columns: 26px 1fr 26px;
+  align-items: center;
+  gap: 8px;
+  font-size: 9px;
+  letter-spacing: .1em;
+  color: #5d6675;
+}
+.ch-bar b { text-align: right; color: #98a2b3; font-weight: 600; }
+.ch-track { display: flex; gap: 2px; }
+.ch-track .seg {
+  flex: 1;
+  height: 6px;
+  background: #171b22;
+}
+.ch-track .seg.on { background: #d7dde7; }
+.ch-bar.atk .seg.on { background: #ff8a6b; }
+.ch-bar.def .seg.on { background: #6bb6ff; }
+.ch-bar.spd .seg.on { background: #86e2a8; }
+
+/* pick button (picker only) */
+.ch-pick {
+  margin-top: 4px;
+  width: 100%;
+  padding: 11px 16px;
+  background: transparent;
+  border: 1px solid var(--ch-accent, #444);
+  color: #fff;
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color .2s ease, color .2s ease;
+}
+.ch-pick:hover { background: var(--ch-accent, #444); color: #05060a; }
+
+/* The champion line on the reveal card, in the cabinet's card language. */
+.rv-champ {
+  display: flex;
+  flex-direction: column;
+  align-items: inherit;
+  gap: 2px;
+  margin: 2px 0 8px;
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ch, #fff);
+}
+.rv-champ i {
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  opacity: 0.6;
+}
+
+/* ---- the index page: a roomier sheet, plus the strategy it writes ---- */
+
+.ch-card-wide .ch-spec dd { font-size: 12px; }
+.ch-card-wide .ch-weapon { max-width: 230px; height: 52px; }
+.ch-card-wide .ch-crest { width: 54px; height: 54px; }
+
+.ch-strategy {
+  display: grid;
+  gap: 6px;
+  padding-top: 12px;
+  border-top: 1px solid #171b22;
+}
+.ch-strategy q {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: #98a2b3;
+  quotes: '\201C' '\201D';
+}
+
+/* archetype legend, derived from the registry at load time */
+.ar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+.ar-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 13px;
+  border: 1px solid rgba(255,255,255,.13);
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #cfd6e0;
+}
+.ar-chip b { color: var(--ch, #fff); font-weight: 600; }
+.ar-chip i { font-style: normal; color: #5d6675; }
+
+/* ---- tools: the archetype filter and the session scoreboard ---- */
+
+.ar-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 34px;
+  padding-top: 26px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.ar-filter { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.f-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.13);
+  color: #9aa4b3;
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color .2s ease, color .2s ease, background-color .2s ease;
+}
+.f-chip i { font-style: normal; color: #5d6675; }
+.f-chip:hover { border-color: rgba(255,255,255,.34); color: #fff; }
+.f-chip.on { border-color: #fff; color: #fff; background: rgba(255,255,255,.07); }
+.f-chip.on i { color: #cfd6e0; }
+
+.ar-record-wrap { display: flex; align-items: center; gap: 12px; }
+.ar-lab {
+  font-size: 9px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #5d6675;
+}
+.ar-record {
+  font-size: 13px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #5d6675;
+}
+.ar-record.has { color: #fff; }
+
+/* The points total next to the win/loss tally. Its own ledger, not a
+   restatement of the record - see js/characters.js. */
+.ar-record-wrap .ar-points {
+  font-size: 13px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #5d6675;
+  padding-left: 12px;
+  border-left: 1px solid rgba(255, 255, 255, .13);
+}
+.ar-record-wrap .ar-points.has { color: var(--ch-accent, #ffd24a); }
+
+.ar-reset {
+  background: none;
+  border: 1px solid rgba(255,255,255,.13);
+  color: #9aa4b3;
+  padding: 0 13px;
+  height: 30px;
+  font: inherit;
+  font-size: 9px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color .2s ease, color .2s ease;
+}
+.ar-reset:hover { border-color: #ff6b6b; color: #ff6b6b; }
+
+.ar-empty {
+  margin: 0 0 20px;
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #5d6675;
+}
+.ar-empty[hidden] { display: none; }
+
+/* ================= cabinet picker overlay ================= */
+
+.champ-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(3, 4, 7, .93);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  overflow-y: auto;
+  padding: 28px 20px 48px;
+}
+.champ-overlay[hidden] { display: none; }
+
+.champ-panel { max-width: 1180px; margin: 0 auto; }
+
+.champ-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #1b1f27;
+  margin-bottom: 8px;
+}
+.champ-bar-l {
+  font-size: 11px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: #cfd6e0;
+}
+.champ-bar-l b { color: #ffd24a; }
+.champ-bar-actions { display: flex; align-items: center; gap: 10px; }
+
+/* one coin flip over the registry */
+.champ-btn {
+  background: none;
+  border: 1px solid #262c36;
+  color: #9aa4b3;
+  padding: 0 14px;
+  height: 34px;
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color .2s ease, color .2s ease;
+}
+.champ-btn:hover { border-color: #ffd24a; color: #ffd24a; }
+
+.champ-close {
+  background: none;
+  border: 1px solid #262c36;
+  color: #cfd6e0;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  transition: border-color .2s ease, color .2s ease;
+}
+.champ-close:hover { border-color: #46505f; color: #fff; }
+
+.champ-note {
+  margin: 12px 0 20px;
+  max-width: 70ch;
+  font-size: 11px;
+  line-height: 1.7;
+  color: #78818f;
+}
+
+.champ-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+  gap: 16px;
+}
+
+/* the trigger, sitting in each player's box during the prompt phase */
+.champ-open {
+  margin-top: 10px;
+  width: 100%;
+  padding: 9px 13px;
+  background: transparent;
+  border: 1px dashed #2b323d;
+  color: #9aa4b3;
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color .2s ease, color .2s ease;
+}
+.champ-open:hover { border-color: #ffd24a; color: #ffd24a; }
+
+/* A locked box is done deciding: the picker stops offering itself. */
+.pbox.locked .champ-open { opacity: .35; pointer-events: none; }
+
+/* The overlay owns the scroll while it is up. */
+body.champ-picking { overflow: hidden; }

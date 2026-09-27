@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Matchup Lab &mdash; ENTITY NEXUS</title>
+<meta name="description" content="Run any two ENTITY NEXUS champions against each other over a fixed series of seeded fights, using the same engine the cabinet fights with. Head-to-head, and reproducible." />
+<meta name="theme-color" content="#05060a" />
+
+<meta property="og:title" content="ENTITY NEXUS — Matchup Lab" />
+<meta property="og:description" content="Seventeen champions. One deterministic engine. Run the series." />
+<meta property="og:type" content="website" />
+
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://db.onlinewebfonts.com/c/8b75d9dcff6a48c35a46656192adf019?family=FSP+DEMO+-+PODIUM+Sharp+4.11" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="entity-nexus.css?v=2" />
+<link rel="stylesheet" href="matchup.css?v=1" />
+<link rel="stylesheet" href="wallet.css?v=1" />
+</head>
+<body class="en-body">
+
+<header class="en-top">
+  <div class="en-wrap en-top-row">
+    <a class="en-brand font-podium" href="index.html" aria-label="ENTITY NEXUS - home">
+      <svg class="en-brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path
+        d="M4 5 L16 27 L28 5" fill="none" stroke="currentColor"
+        stroke-width="3.4" stroke-linejoin="miter"/></svg>
+      <span>ENTITY NEXUS</span>
+    </a>
+    <nav class="en-top-links font-inter" aria-label="Pages">
+      <a href="index.html">Home</a>
+      <a href="champions.html">Champions</a>
+      <a href="dialogues.html">Vault</a>
+      <a href="matchup.html" class="on">Lab</a>
+      <a href="play.html">Cabinet</a>
+      <a href="spectate.html">Floor</a>
+    </nav>
+    <div class="en-top-end">
+      <button class="en-wallet font-inter wchip" id="mt-wallet" type="button"
+              data-wallet-chip aria-haspopup="true">
+        <i aria-hidden="true"></i><span>Connect wallet</span>
+      </button>
+      <a class="en-cta font-inter" href="play.html">
+        Insert coin
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="mt-wrap">
+
+  <section class="en-band en-hero-band">
+    <div class="en-wrap">
+      <header class="en-band-head">
+        <span class="en-eyebrow">Matchup lab</span>
+        <h2 class="font-podium">Two champions.<br /><em>Every seed that matters.</em></h2>
+        <p class="en-band-note">Pick a side each and run the series. The fights are
+          played by the same headless harness the settlement path trusts &mdash;
+          <code>house/sim.js</code>, which executes <code>js/game.js</code> itself rather
+          than reimplementing it &mdash; so a result here is the fight you would watch,
+          not a model of it. Nothing is settled, nothing is bet, and no wallet is
+          involved.</p>
+      </header>
+
+      <div class="mt-picks">
+        <div class="mt-pick" id="mt-side-a" style="--side:#63b6e8">
+          <span class="mt-pick-lab">Side A</span>
+          <select id="mt-select-a" aria-label="Champion for side A"></select>
+          <div class="mt-pick-meta">
+            <b class="mt-pick-name" id="mt-name-a">&mdash;</b>
+            <span class="mt-pick-sub" id="mt-sub-a">&mdash;</span>
+          </div>
+        </div>
+
+        <div class="mt-vs" aria-hidden="true">VS</div>
+
+        <div class="mt-pick" id="mt-side-b" style="--side:#f1709a">
+          <span class="mt-pick-lab">Side B</span>
+          <select id="mt-select-b" aria-label="Champion for side B"></select>
+          <div class="mt-pick-meta">
+            <b class="mt-pick-name" id="mt-name-b">&mdash;</b>
+            <span class="mt-pick-sub" id="mt-sub-b">&mdash;</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-controls">
+        <button class="mt-go" id="mt-run" type="button">Run the series</button>
+        <button class="mt-go" id="mt-swap" type="button"
+                style="background:transparent;color:#e9edf5;border:1px solid #2a3140">Swap sides</button>
+        <label class="mt-n">Fights
+          <select id="mt-n">
+            <option value="11">11</option>
+            <option value="41" selected>41</option>
+            <option value="101">101</option>
+          </select>
+        </label>
+        <button class="mt-go" id="mt-random" type="button"
+                style="background:transparent;color:#e9edf5;border:1px solid #2a3140">Surprise me</button>
+        <span class="mt-status" id="mt-status">Ready. A 41-fight series takes about a second and a half.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="en-band en-band-alt" id="mt-result-band" hidden>
+    <div class="en-wrap">
+
+      <div class="mt-split" id="mt-split" role="img" aria-label="Win split"></div>
+
+      <div class="mt-grid" id="mt-grid" style="margin-top:18px"></div>
+
+      <div class="mt-strat" id="mt-strat" style="margin-top:18px"></div>
+
+      <table class="mt-log" id="mt-log" style="margin-top:22px">
+        <caption id="mt-log-cap">First fights of the series</caption>
+        <thead>
+          <tr><th>#</th><th>Seed</th><th>Winner</th><th>Frames</th><th>Seconds</th><th>HP A</th><th>HP B</th><th>Finish</th></tr>
+        </thead>
+        <tbody id="mt-log-body"></tbody>
+      </table>
+
+      <p class="mt-note" id="mt-note" style="margin-top:22px"></p>
+
+    </div>
+  </section>
+
+  <section class="en-band">
+    <div class="en-wrap">
+      <header class="en-band-head">
+        <span class="en-eyebrow">How to read it</span>
+        <h2 class="font-podium">A rate is not <em>a promise.</em></h2>
+      </header>
+      <p class="mt-note">Three things are worth saying out loud, because a
+        head-to-head invites all three to be misread.</p>
+      <div class="mt-strat" style="margin-top:18px">
+        <div class="mt-strat-card" style="--side:#63b6e8">
+          <h4>The sample is fixed and published</h4>
+          <q>Seeds come from one constant, <code>2654435761</code>, using the
+            same common-random-numbers trick the test suite uses. Run the same pair
+            again and you get the same fights, second for second.</q>
+        </div>
+        <div class="mt-strat-card" style="--side:#f1709a">
+          <h4>Which is not the same as fair</h4>
+          <q>A champion that wins 60% of one particular series has won that
+            series. Whether it is stronger overall is a question this page
+            deliberately does not answer with a bigger number on the box.</q>
+        </div>
+        <div class="mt-strat-card" style="--side:#2bd96b">
+          <h4>Draws stay draws</h4>
+          <q>Both fighters can still be standing when the clock runs out. Those
+            are counted in their own column &mdash; never folded into a winner,
+            because the engine did not name one.</q>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="en-foot">
+  <div class="en-wrap en-foot-grid">
+    <div class="en-foot-brand font-podium">
+      <svg class="en-brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path
+        d="M4 5 L16 27 L28 5" fill="none" stroke="currentColor"
+        stroke-width="3.4" stroke-linejoin="miter"/></svg>
+      <span>ENTITY NEXUS</span>
+    </div>
+    <nav class="en-foot-links font-inter" aria-label="Pages">
+      <a href="index.html">Home</a>
+      <a href="champions.html">Champion index</a>
+      <a href="dialogues.html">Dialogue vault</a>
+      <a href="play.html">Cabinet</a>
+      <a href="spectate.html">Spectate &amp; bet</a>
+    </nav>
+    <div class="en-foot-note font-inter">Built on Monad</div>
+  </div>
+</footer>
+
+<script src="js/vendor/ethers.umd.min.js?v=16"></script>
+<script src="js/utils.js?v=16"></script>
+<script src="js/config.js?v=16"></script>
+<script src="js/blockchain.js?v=16"></script>
+<script src="js/wallet.js?v=1"></script>
+<script src="js/prompt-parser.js?v=16"></script>
+<script src="js/characters.js?v=3"></script>
+<script>
+(function () {
+  if (typeof WalletChip !== 'undefined') WalletChip.mount()
+})()
+</script>
+<script src="js/matchup.js?v=1"></script>
+
+</body>
+</html>

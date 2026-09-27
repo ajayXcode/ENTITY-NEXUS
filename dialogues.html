@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dialogue Vault &mdash; ENTITY NEXUS</title>
+<meta name="description" content="Twenty-five film lines from Hindi, English, Tamil, Telugu and Korean cinema. Cast one in the cabinet and the game's own parser builds the fighter out of it." />
+<meta name="theme-color" content="#05060a" />
+
+<meta property="og:title" content="ENTITY NEXUS — Dialogue Vault" />
+<meta property="og:description" content="Twenty-five lines. Five cinemas. One fighter each." />
+<meta property="og:type" content="website" />
+
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://db.onlinewebfonts.com/c/8b75d9dcff6a48c35a46656192adf019?family=FSP+DEMO+-+PODIUM+Sharp+4.11" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="entity-nexus.css?v=3" />
+<link rel="stylesheet" href="champions.css?v=3" />
+<link rel="stylesheet" href="dialogues.css?v=1" />
+<link rel="stylesheet" href="wallet.css?v=1" />
+</head>
+<body class="en-body">
+
+<header class="en-top">
+  <div class="en-wrap en-top-row">
+    <a class="en-brand font-podium" href="index.html" aria-label="ENTITY NEXUS - home">
+      <svg class="en-brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path
+        d="M4 5 L16 27 L28 5" fill="none" stroke="currentColor"
+        stroke-width="3.4" stroke-linejoin="miter"/></svg>
+      <span>ENTITY NEXUS</span>
+    </a>
+    <nav class="en-top-links font-inter" aria-label="Pages">
+      <a href="index.html">Home</a>
+      <a href="champions.html">Champions</a>
+      <a href="dialogues.html" class="on">Vault</a>
+      <a href="matchup.html">Lab</a>
+      <a href="play.html">Cabinet</a>
+      <a href="spectate.html">Floor</a>
+    </nav>
+    <div class="en-top-end">
+      <button class="en-wallet font-inter wchip" id="dl-wallet" type="button"
+              data-wallet-chip aria-haspopup="true">
+        <i aria-hidden="true"></i><span>Connect wallet</span>
+      </button>
+      <a class="en-cta font-inter" href="play.html">
+        Insert coin
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="dlg-page">
+
+  <section class="dlg-hero">
+    <span class="dlg-eyebrow font-inter">The dialogue vault</span>
+    <h1 class="font-podium">Twenty&#8209;five lines.<br /><em>One fighter each.</em></h1>
+    <p class="font-inter">The cabinet no longer asks you to write a strategy.
+      You cast a line of dialogue, and that line is what the fight is built
+      from &mdash; through the game&rsquo;s own parser, so every card below shows
+      the archetype and the numbers you will actually get. Five cinemas, and
+      every archetype the engine can produce.</p>
+  </section>
+
+  <div class="dlg-filters font-inter">
+    <div class="dlg-filter-row" id="dl-langs" role="group" aria-label="Filter by language"></div>
+    <div class="dlg-filter-row" id="dl-genres" role="group" aria-label="Filter by genre"></div>
+  </div>
+
+  <section class="dlg-page-wrap">
+    <p class="ar-empty" id="dl-empty" hidden>No line matches those two filters.</p>
+    <div class="dlg-page-grid" id="dl-grid"></div>
+
+    <p class="dlg-page-note font-inter">Every line here is original writing in the
+      idiom of its cinema rather than a quotation &mdash; famous dialogue belongs to
+      the people who wrote it. The languages and the genres are the real thing;
+      the words are ours. Each line was scored through
+      <code>parsePrompt()</code> before it was accepted, so no two lines on this
+      page produce the same stat line.</p>
+  </section>
+
+  <section class="en-band en-cta-band">
+    <div class="en-wrap en-cta-row">
+      <h2 class="font-podium">Cast one and put it on the floor.</h2>
+      <a class="en-btn-dark font-inter" href="play.html">
+        Insert coin
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="en-foot">
+  <div class="en-wrap en-foot-grid">
+    <div class="en-foot-brand font-podium">
+      <svg class="en-brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path
+        d="M4 5 L16 27 L28 5" fill="none" stroke="currentColor"
+        stroke-width="3.4" stroke-linejoin="miter"/></svg>
+      <span>ENTITY NEXUS</span>
+    </div>
+    <nav class="en-foot-links font-inter" aria-label="Pages">
+      <a href="index.html">Home</a>
+      <a href="champions.html">Champion index</a>
+      <a href="matchup.html">Matchup lab</a>
+      <a href="play.html">Cabinet</a>
+      <a href="spectate.html">Spectate &amp; bet</a>
+    </nav>
+    <div class="en-foot-note font-inter">Built on Monad</div>
+  </div>
+</footer>
+
+<!-- Same load order as the champion index: utils, config, the parser the
+     cards are built from, then the vault (which uses the parser) and the
+     champion registry (which supplies the shared stat-bar renderer). -->
+<script src="js/vendor/ethers.umd.min.js?v=16"></script>
+<script src="js/utils.js?v=16"></script>
+<script src="js/config.js?v=16"></script>
+<script src="js/blockchain.js?v=16"></script>
+<script src="js/wallet.js?v=1"></script>
+<script src="js/prompt-parser.js?v=16"></script>
+<script src="js/characters.js?v=3"></script>
+<script src="js/dialogues.js?v=1"></script>
+<script>
+(function () {
+  if (typeof WalletChip === 'undefined') return
+  WalletChip.mount()
+})()
+</script>
+<script>
+(function () {
+  if (typeof Dialogues === 'undefined') return
+
+  /* Everything on this page is derived from the vault and the parser - the
+     counts, the filters and the grid all read the same list, so they cannot
+     disagree with each other or with the cabinet. */
+  var rows = Dialogues.all.map(function (d) {
+    return { d: d, arch: Dialogues.archetype(d) }
+  })
+
+  var byLang = {}
+  Dialogues.languages.forEach(function (l) { byLang[l.id] = 0 })
+  var byGenre = {}
+  rows.forEach(function (r) {
+    byLang[r.d.language] = (byLang[r.d.language] || 0) + 1
+    byGenre[r.d.genre] = (byGenre[r.d.genre] || 0) + 1
+  })
+  var genres = Object.keys(byGenre).sort()
+
+  var lang = 'all'
+  var genre = 'ALL'
+  var langHost = document.getElementById('dl-langs')
+  var genreHost = document.getElementById('dl-genres')
+  var grid = document.getElementById('dl-grid')
+  var empty = document.getElementById('dl-empty')
+
+  function paintFilters() {
+    if (langHost) {
+      langHost.innerHTML = [{ id: 'all', label: 'All cinemas' }]
+        .concat(Dialogues.languages)
+        .map(function (l) {
+          var n = l.id === 'all' ? rows.length : (byLang[l.id] || 0)
+          return '<button class="dlg-fbtn' + (l.id === lang ? ' on' : '') +
+                 '" type="button" data-lang="' + l.id + '"' +
+                 ' aria-pressed="' + (l.id === lang ? 'true' : 'false') + '">' +
+                 l.label + '<i>' + n + '</i></button>'
+        }).join('')
+    }
+    if (genreHost) {
+      genreHost.innerHTML = ['ALL'].concat(genres).map(function (g) {
+        return '<button class="dlg-fbtn' + (g === genre ? ' on' : '') +
+               '" type="button" data-genre="' + g + '"' +
+               ' aria-pressed="' + (g === genre ? 'true' : 'false') + '">' +
+               g + '<i>' + (g === 'ALL' ? rows.length : byGenre[g]) + '</i></button>'
+      }).join('')
+    }
+  }
+
+  function paint() {
+    paintFilters()
+    var list = rows.filter(function (r) {
+      return (lang === 'all' || r.d.language === lang) &&
+             (genre === 'ALL' || r.d.genre === genre)
+    })
+    if (grid) {
+      grid.innerHTML = list.map(function (r) {
+        return Dialogues.cardHTML(r.d, { wide: true })
+      }).join('')
+    }
+    if (empty) empty.hidden = list.length > 0
+  }
+
+  if (langHost) {
+    langHost.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-lang]')
+      if (!b) return
+      lang = b.dataset.lang
+      paint()
+    })
+  }
+  if (genreHost) {
+    genreHost.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-genre]')
+      if (!b) return
+      genre = b.dataset.genre
+      paint()
+    })
+  }
+
+  paint()
+})()
+</script>
+
+</body>
+</html>

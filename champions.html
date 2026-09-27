@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Champion Index &mdash; ENTITY NEXUS</title>
+<meta name="description" content="Every ENTITY NEXUS champion: species, style, weapons, role, traits, colour palette and the archetype the game's own parser builds from them." />
+<meta name="theme-color" content="#05060a" />
+
+<meta property="og:title" content="ENTITY NEXUS — Champion Index" />
+<meta property="og:description" content="Seventeen champions. Eight archetypes." />
+<meta property="og:type" content="website" />
+
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://db.onlinewebfonts.com/c/8b75d9dcff6a48c35a46656192adf019?family=FSP+DEMO+-+PODIUM+Sharp+4.11" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="entity-nexus.css?v=2" />
+<link rel="stylesheet" href="champions.css?v=3" />
+<link rel="stylesheet" href="wallet.css?v=1" />
+</head>
+<body class="en-body">
+
+<header class="en-top">
+  <div class="en-wrap en-top-row">
+    <a class="en-brand font-podium" href="index.html" aria-label="ENTITY NEXUS - home">
+      <svg class="en-brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path
+        d="M4 5 L16 27 L28 5" fill="none" stroke="currentColor"
+        stroke-width="3.4" stroke-linejoin="miter"/></svg>
+      <span>ENTITY NEXUS</span>
+    </a>
+    <nav class="en-top-links font-inter" aria-label="Pages">
+      <a href="index.html">Home</a>
+      <a href="champions.html" class="on">Champions</a>
+      <a href="dialogues.html">Vault</a>
+      <a href="matchup.html">Lab</a>
+      <a href="play.html">Cabinet</a>
+      <a href="spectate.html">Floor</a>
+    </nav>
+    <div class="en-top-end">
+      <button class="en-wallet font-inter wchip" id="ch-wallet" type="button"
+              data-wallet-chip aria-haspopup="true">
+        <i aria-hidden="true"></i><span>Connect wallet</span>
+      </button>
+      <a class="en-cta font-inter" href="play.html">
+        Insert coin
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section class="en-band en-hero-band">
+    <div class="en-wrap">
+      <header class="en-band-head">
+        <span class="en-eyebrow">Champion index</span>
+        <h2 class="font-podium">Seventeen champions.<br /><em>Eight archetypes.</em></h2>
+        <p class="en-band-note">Each champion is a fixed combat identity that the
+          cabinet will build for you, and every card below is rendered from the
+          game's own <code>parsePrompt()</code> &mdash; so nothing on this page is
+          a promise the fight cannot keep. RAPHAEL and MALGRAVE also ship their
+          own battle sprites, which is what the portrait on their cards is. Pick
+          one in the cabinet and its strategy is written into your box, or cast
+          a line out of the <a href="dialogues.html">dialogue vault</a> and the
+          same parser builds the same kind of fighter from the line instead.</p>
+      </header>
+
+      <div class="ar-legend" id="ar-legend"></div>
+
+      <div class="ar-tools">
+        <div class="ar-filter" id="ar-filter" role="group" aria-label="Filter by archetype"></div>
+        <div class="ar-record-wrap">
+          <span class="ar-lab">Your session</span>
+          <b class="ar-record" id="ar-record">&mdash;</b>
+          <b class="ar-points" id="ar-points" title="Points are paid after every decided round, to the winner and the loser alike. Kept in this browser only.">&mdash;</b>
+          <button class="ar-reset" id="ar-reset" type="button">Reset record</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="en-band en-band-alt">
+    <div class="en-wrap">
+      <p class="ar-empty" id="ar-empty" hidden>No champion in that archetype.</p>
+      <div class="en-roster-grid" id="index-grid"></div>
+    </div>
+  </section>
+
+  <section class="en-band en-cta-band">
+    <div class="en-wrap en-cta-row">
+      <h2 class="font-podium">Pick one and put it on the floor.</h2>
+      <a class="en-btn-dark font-inter" href="play.html">
+        Insert coin
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="en-foot">
+  <div class="en-wrap en-foot-grid">
+    <div class="en-foot-brand font-podium">
+      <svg class="en-brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path
+        d="M4 5 L16 27 L28 5" fill="none" stroke="currentColor"
+        stroke-width="3.4" stroke-linejoin="miter"/></svg>
+      <span>ENTITY NEXUS</span>
+    </div>
+    <nav class="en-foot-links font-inter" aria-label="Pages">
+      <a href="index.html">Home</a>
+      <a href="dialogues.html">Dialogue vault</a>
+      <a href="matchup.html">Matchup lab</a>
+      <a href="play.html">Cabinet</a>
+      <a href="spectate.html">Spectate &amp; bet</a>
+    </nav>
+    <div class="en-foot-note font-inter">Built on Monad</div>
+  </div>
+</footer>
+
+<!-- Same load order as the cabinet and the landing page: utils, config, then
+     the parser the champion cards are built from. -->
+<script src="js/vendor/ethers.umd.min.js?v=16"></script>
+<script src="js/utils.js?v=16"></script>
+<script src="js/config.js?v=16"></script>
+<script src="js/blockchain.js?v=16"></script>
+<script src="js/wallet.js?v=1"></script>
+<script src="js/prompt-parser.js?v=16"></script>
+<script src="js/characters.js?v=3"></script>
+<script>
+(function () {
+  if (typeof WalletChip === 'undefined') return
+  WalletChip.mount()
+})()
+</script>
+<script>
+(function () {
+  if (typeof Characters === 'undefined') return
+
+  /* Everything on this page is derived from the registry and the parser -
+     the legend, the filter and the grid all read the same list, so they
+     cannot disagree with each other or with the cabinet. */
+  var rows = Characters.all.map(function (c) {
+    return { c: c, arch: Characters.parsed(c).archetype }
+  })
+
+  var byArch = {}
+  rows.forEach(function (r) {
+    if (!byArch[r.arch]) byArch[r.arch] = { n: 0, accent: r.c.accent }
+    byArch[r.arch].n++
+  })
+  var archNames = Object.keys(byArch).sort()
+
+  var legend = document.getElementById('ar-legend')
+  if (legend) {
+    legend.innerHTML = archNames.map(function (a) {
+      return '<span class="ar-chip" style="--ch:' + byArch[a].accent + '">' +
+             '<b>' + a + '</b><i>' + byArch[a].n + '</i></span>'
+    }).join('')
+  }
+
+  /* ---- filter ---- */
+  var filter = 'ALL'
+  var filterHost = document.getElementById('ar-filter')
+  var grid = document.getElementById('index-grid')
+  var empty = document.getElementById('ar-empty')
+
+  function paint() {
+    if (filterHost) {
+      filterHost.innerHTML = ['ALL'].concat(archNames).map(function (a) {
+        return '<button class="f-chip' + (a === filter ? ' on' : '') + '" type="button"' +
+               ' data-arch="' + a + '"' +
+               ' aria-pressed="' + (a === filter ? 'true' : 'false') + '">' +
+               a + '<i>' + (a === 'ALL' ? rows.length : byArch[a].n) + '</i></button>'
+      }).join('')
+    }
+    var list = rows.filter(function (r) { return filter === 'ALL' || r.arch === filter })
+    if (grid) grid.innerHTML = list.map(function (r) { return Characters.showcaseHTML(r.c) }).join('')
+    if (empty) empty.hidden = list.length > 0
+  }
+
+  if (filterHost) {
+    filterHost.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-arch]')
+      if (!b) return
+      filter = b.dataset.arch
+      paint()
+    })
+  }
+
+  /* ---- the session record, and the points beside it ----
+     Two ledgers, deliberately: a win/loss tally and a score. A champion can
+     be 3W-1L and still be behind on points, and both numbers are true. */
+  var recEl = document.getElementById('ar-record')
+  var ptsEl = document.getElementById('ar-points')
+
+  function paintRecord() {
+    if (!recEl) return
+    var t = Characters.record.total()
+    recEl.textContent = t.w + 'W \u00b7 ' + t.l + 'L'
+    recEl.classList.toggle('has', (t.w + t.l) > 0)
+    if (!ptsEl) return
+    var p = Characters.points.total()
+    ptsEl.textContent = p.toLocaleString() + ' PTS'
+    ptsEl.classList.toggle('has', p > 0)
+  }
+
+  var reset = document.getElementById('ar-reset')
+  if (reset) {
+    reset.addEventListener('click', function () {
+      Characters.record.clear()
+      Characters.points.clear()
+      paint()
+      paintRecord()
+    })
+  }
+
+  paint()
+  paintRecord()
+})()
+</script>
+
+</body>
+</html>

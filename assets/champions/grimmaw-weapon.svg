@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 64" role="img" aria-label="Tower shield, warhammer">
+<path d="M12 12 h30 v40 h-30 z" fill="none" stroke="#e2622a" stroke-width="3"/>
+    <path d="M16 32 L27 20 L38 32" fill="none" stroke="#e2622a" stroke-width="3"/>
+    <rect x="50" y="29" width="46" height="6" rx="3" fill="#cfd6e0"/>
+    <rect x="92" y="16" width="20" height="32" rx="3" fill="#cfd6e0"/>
+    <rect x="92" y="16" width="20" height="32" rx="3" fill="none" stroke="#e2622a" stroke-width="2.4"/>
+</svg>

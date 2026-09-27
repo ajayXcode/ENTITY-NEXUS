@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 64" role="img" aria-label="Twin daggers">
+<rect x="10" y="14" width="16" height="5" rx="2" fill="#cfd6e0"/>
+    <path d="M26 12 L76 14 L88 16.5 L76 19 L26 21 Z" fill="#cfd6e0"/>
+    <rect x="18" y="46" width="16" height="5" rx="2" fill="#cfd6e0"/>
+    <path d="M34 44 L84 45 L96 47.5 L84 50 L34 51 Z" fill="#7d4bd6"/>
+</svg>

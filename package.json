@@ -1,0 +1,16 @@
+{
+  "name": "ai-fighter-arena",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Build an AI fighter, reveal its strategy, bet on it, watch it fight, and let Monad settle the result. Static front end, JEV tactical advisor, rooms relay and settlement arbiter, all served by one Node process.",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tests/run.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ethers": "^6.17.0"
+  }
+}

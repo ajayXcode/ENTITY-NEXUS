@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 64" role="img" aria-label="Sai (pair)">
+<rect x="10" y="29" width="22" height="6" rx="3" fill="#cfd6e0"/>
+    <rect x="30" y="21" width="7" height="22" rx="3" fill="#cfd6e0"/>
+    <path d="M37 28 L100 26 L114 32 L100 38 L37 36 Z" fill="#cfd6e0"/>
+    <path d="M44 26 q16 -12 14 6" fill="none" stroke="#cfd6e0" stroke-width="3.4"/>
+    <path d="M44 38 q16 12 14 -6" fill="none" stroke="#cfd6e0" stroke-width="3.4"/>
+</svg>

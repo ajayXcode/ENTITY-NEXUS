@@ -1,0 +1,117 @@
+# Render blueprint. `render.yaml` in the repo root means New > Blueprint picks
+# this up and there is nothing to fill in but the keys.
+#
+# THE ONE RULE THAT MATTERS: exactly one instance.
+#
+# The rooms relay in server.js keeps its state in memory - a Map of room code
+# to the players subscribed to it. Two instances means player 1 can land on
+# instance A, player 2 on instance B, and they never see each other. There is
+# no error and no crash: the host sits in the lobby, the guest is told NO ROOM
+# WITH THAT CODE, and nothing in the logs says why. The free plan is always a
+# single instance, which is why it is the one specified here. If this ever
+# moves to a paid plan, keep numInstances at 1 (or move room state into Redis
+# first - it is about thirty lines, but it is not free-tier work).
+#
+# Serverless hosts are out for the same reason, and more so: Vercel and
+# Netlify Functions and Cloudflare Workers give each request its own isolate
+# with its own memory, so the relay cannot work there at all. This needs a
+# long-lived process.
+
+services:
+  - type: web
+    name: ai-fighter-arena
+    runtime: node
+    plan: free
+    region: oregon
+
+    # One dependency: ethers, which the arbiter needs to produce EIP-712
+    # settlement signatures and to send the three arbiter-only transactions
+    # per match. Everything else in server.js is still node's own http/fs.
+    buildCommand: npm install
+    startCommand: node server.js
+
+    # Cheap, keyless, and already reports whether the relay is up. It also
+    # reports the house floor's tables and their phases, so "is the demo
+    # alive" is answerable without loading the page.
+    healthCheckPath: /api/health
+
+    envVars:
+      # sync:false = "prompt me in the dashboard, do not store it in git".
+      # Only key 1 is required; the server reads as many as it finds, so the
+      # rest can be left blank and added later.
+      - key: GEMINI_API_KEY_1
+        sync: false
+      - key: GEMINI_API_KEY_2
+        sync: false
+      - key: GEMINI_API_KEY_3
+        sync: false
+      - key: GEMINI_API_KEY_4
+        sync: false
+      - key: GEMINI_API_KEY_5
+        sync: false
+      - key: GEMINI_API_KEY_6
+        sync: false
+      - key: GEMINI_API_KEY_7
+        sync: false
+      - key: GEMINI_API_KEY_8
+        sync: false
+
+      # ---- the arbiter ----
+      #
+      # The settlement signer. This key must be the SAME address that
+      # ArenaBattle holds in `arbiter`, or the contract rejects every
+      # settlement this server produces - and lockAgents/openBetting/
+      # startMatch revert before that with "not arbiter". Check the two
+      # agree with:
+      #
+      #     node scripts/set-arbiter.js
+      #
+      # It must NOT be the contract owner's key. The owner can withdraw
+      # fees, pause the contract and re-point the arbiter; none of that
+      # belongs in a long-running web process. The arbiter can only advance
+      # a match through its lifecycle and cannot touch a single MON.
+      #
+      # It needs gas: three transactions per match.
+      - key: ARBITER_PRIVATE_KEY
+        sync: false
+
+      # Optional. Defaults to https://testnet-rpc.monad.xyz when unset;
+      # set it to point at a private RPC if the public one rate-limits.
+      - key: MONAD_RPC
+        sync: false
+
+      # ---- the house floor ----
+      #
+      # Tables the server seats itself, so spectate.html is never an empty
+      # page. They use the same contract, arbiter and market rules as a
+      # match between two humans, and each is labelled HOUSE on the board.
+      #
+      # WHAT THIS COSTS, because it is real money on a real chain:
+      # one full cycle - create, two submitAgents, lockAgents, openBetting,
+      # closeBetting, startMatch, settleMatch - is about 0.12 MON of gas.
+      #
+      # Two things keep that from draining the arbiter:
+      #
+      #   1. A table opens NO market at all unless somebody has loaded the
+      #      floor in the last 90 seconds. An idle deployment costs nothing
+      #      and wakes within about ten seconds of the first visitor.
+      #   2. A market nobody backs on both sides is abandoned rather than
+      #      fought, and the table backs off (45s, 2min, 4min) before
+      #      trying again.
+      #
+      # So budget by traffic, not by uptime: roughly 0.12 MON per completed
+      # match, times however many people are actually betting.
+      #
+      # HOUSE_CHAIN_TABLES is how many tables run on chain (default 2).
+      # Set it to 0 for a deployment that never spends - the floor then
+      # shows nothing until real players open rooms. There is no paper
+      # fallback when an arbiter key IS present, because a paper table
+      # cannot see a bet and so could never legitimately start.
+      - key: HOUSE_CHAIN_TABLES
+        value: "2"
+
+      # "off" disables the house floor entirely. Player rooms still get
+      # real markets - that is not part of the floor and is never gated
+      # behind this.
+      - key: HOUSE_FLOOR
+        value: "on"
