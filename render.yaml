@@ -19,7 +19,7 @@
 
 services:
   - type: web
-    name: entity-nexus
+    name: entitynexsus
     runtime: node
     plan: free
     region: oregon
