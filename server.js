@@ -830,7 +830,9 @@ function serveStatic(req, res, pathname) {
     res.writeHead(200, {
       'Content-Type': MIME[path.extname(file).toLowerCase()] || 'application/octet-stream',
       'Content-Length': st.size,
-      'Cache-Control': 'no-cache'
+      'Cache-Control': 'no-cache',
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'SAMEORIGIN'
     })
     if (req.method === 'HEAD') return res.end()
     fs.createReadStream(file).pipe(res)
@@ -1167,8 +1169,10 @@ setInterval(() => {
 }, 30000).unref()
 
 const server = http.createServer(async (req, res) => {
-  const parsed = url.parse(req.url, true)
-  const pathname = parsed.pathname
+  const parsedUrl = new URL(req.url, 'http://' + (req.headers.host || 'localhost'))
+  const pathname = parsedUrl.pathname
+  const query = Object.fromEntries(parsedUrl.searchParams)
+  const parsed = { pathname, query }
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204, {

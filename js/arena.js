@@ -247,7 +247,7 @@ const Arena = {
       const a = m.agents[side]
       const host = document.querySelector('#agent-' + side)
       if (!host || !a) continue
-      host.innerHTML = ''
+      host.textContent = ''
 
       const h = (cls, text) => {
         const d = document.createElement('div')

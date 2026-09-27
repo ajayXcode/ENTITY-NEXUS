@@ -205,7 +205,7 @@ const HexRacer = {
   buildPresets() {
     const host = document.getElementById('presets-hex')
     if (!host) return
-    host.innerHTML = ''
+    host.textContent = ''
     HEX_PRESETS.forEach((p) => {
       const b = document.createElement('button')
       b.className = 'preset'
@@ -259,10 +259,13 @@ const HexRacer = {
 
     const chips = document.getElementById('chips-hex')
     if (chips) {
-      chips.innerHTML = ''
+      chips.textContent = ''
       if (hasText) {
         if (res.improvised && !res.matched.length) {
-          chips.innerHTML = '<span class="chip improv">no keywords — improvising</span>'
+          const span = document.createElement('span')
+          span.className = 'chip improv'
+          span.textContent = 'no keywords — improvising'
+          chips.appendChild(span)
         } else {
           const seen = new Set()
           res.matched.forEach((m) => {

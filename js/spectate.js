@@ -161,7 +161,7 @@ const Spectate = {
     /* Rebuilt wholesale on a three-second clock, which is cheap at this size
        and removes every class of "the row updated but the handler still
        points at the old match" bug. */
-    host.innerHTML = ''
+    host.textContent = ''
     for (const m of this.matches) host.appendChild(this.row(m))
   },
 
@@ -257,7 +257,8 @@ const Spectate = {
 
     $('#detail-empty').classList.add('hidden')
     $('#detail-card').classList.remove('hidden')
-    $('#feed-log').innerHTML = ''
+    const feedLog = $('#feed-log')
+    if (feedLog) feedLog.textContent = ''
     this.log('watching room ' + code, 'ok')
 
     this.paintList()
@@ -665,17 +666,24 @@ const Spectate = {
     el.querySelector('.d-addr').classList.toggle('none', !f.addr)
 
     const bars = el.querySelector('.d-bars')
-    bars.innerHTML = ''
-    if (revealed) {
-      const rows = [['ATK', f.stats.aggression], ['DEF', f.stats.defense], ['SPD', f.stats.speed]]
-      for (const [name, v] of rows) {
-        const row = document.createElement('div')
-        row.className = 'd-bar'
-        row.innerHTML = '<span></span><i><u></u></i><b></b>'
-        row.querySelector('span').textContent = name
-        row.querySelector('u').style.width = Math.round(v * 100) + '%'
-        row.querySelector('b').textContent = String(Math.round(v * 100)).padStart(2, '0')
-        bars.appendChild(row)
+    if (bars) {
+      bars.textContent = ''
+      if (revealed) {
+        const rows = [['ATK', f.stats.aggression], ['DEF', f.stats.defense], ['SPD', f.stats.speed]]
+        for (const [name, v] of rows) {
+          const row = document.createElement('div')
+          row.className = 'd-bar'
+          const sSpan = document.createElement('span')
+          sSpan.textContent = name
+          const sI = document.createElement('i')
+          const sU = document.createElement('u')
+          sU.style.width = Math.round(v * 100) + '%'
+          sI.appendChild(sU)
+          const sB = document.createElement('b')
+          sB.textContent = String(Math.round(v * 100)).padStart(2, '0')
+          row.append(sSpan, sI, sB)
+          bars.appendChild(row)
+        }
       }
     }
   },

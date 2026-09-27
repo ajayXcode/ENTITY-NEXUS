@@ -811,11 +811,20 @@ function showFatal(err) {
     el.id = 'fatal'
     document.body.appendChild(el)
   }
-  el.innerHTML =
-    '<b>RENDER LOOP STOPPED</b>' +
-    '<p>' + String(err && err.message ? err.message : err) + '</p>' +
-    '<p class="hint">If you just edited a file this is almost always a stale cached ' +
-    'script. Hard-refresh with Ctrl+Shift+R.</p>'
+  /* Use DOM APIs so that an exception whose .message contains '<' or '>'
+     (e.g. from a crafted network payload triggering a parse error) cannot
+     inject markup into the error banner. */
+  el.textContent = ''
+  const title = document.createElement('b')
+  title.textContent = 'RENDER LOOP STOPPED'
+  el.appendChild(title)
+  const msg = document.createElement('p')
+  msg.textContent = String(err && err.message ? err.message : err)
+  el.appendChild(msg)
+  const hint = document.createElement('p')
+  hint.className = 'hint'
+  hint.textContent = 'If you just edited a file this is almost always a stale cached script. Hard-refresh with Ctrl+Shift+R.'
+  el.appendChild(hint)
 }
 
 function animate(now) {

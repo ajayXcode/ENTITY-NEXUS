@@ -582,7 +582,7 @@ const Rooms = {
     const me = Net.side
     const opp = Net.peerSide
     const log = document.querySelector('#analyze-log')
-    log.innerHTML = ''
+    if (log) log.textContent = ''
 
     const say = (t, cls) => {
       const d = document.createElement('div')

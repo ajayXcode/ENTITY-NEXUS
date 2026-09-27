@@ -551,10 +551,14 @@ const UI = {
     this.renderBars($(`#bars-${side}`), res.stats)
 
     const chips = $(`#chips-${side}`)
-    chips.innerHTML = ''
+    if (!chips) return
+    chips.textContent = ''
     if (!text.trim()) return
     if (res.improvised) {
-      chips.innerHTML = '<span class="chip improv">no keywords — improvising</span>'
+      const span = document.createElement('span')
+      span.className = 'chip improv'
+      span.textContent = 'no keywords — improvising'
+      chips.appendChild(span)
       return
     }
     const seen = new Set()

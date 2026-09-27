@@ -40,9 +40,8 @@ const ok = (m) => console.log('  ok    ' + m)
 function scriptsOf(page) {
   const html = fs.readFileSync(path.join(ROOT, page), 'utf8')
   const out = []
-  const re = /<script\s+src="([^"]+)"/g
-  let mm
-  while ((mm = re.exec(html))) out.push(mm[1].split('?')[0])
+  const matches = html.matchAll(/<script\s+src="([^"]+)"/g)
+  for (const mm of matches) out.push(mm[1].split('?')[0])
   return out
 }
 

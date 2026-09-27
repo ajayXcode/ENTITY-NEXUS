@@ -188,7 +188,7 @@ const MyBets = {
     if (btn) btn.disabled = this.loading
 
     if (!Chain.userAddress) {
-      host.innerHTML = ''
+      host.textContent = ''
       if (note) note.textContent = 'Connect a wallet to see the bets it has placed.'
       return
     }
@@ -197,12 +197,12 @@ const MyBets = {
       return
     }
     if (this.error) {
-      host.innerHTML = ''
+      host.textContent = ''
       if (note) note.textContent = 'Could not read your bets: ' + this.error
       return
     }
 
-    host.innerHTML = ''
+    host.textContent = ''
     if (!this.rows.length) {
       if (note) {
         note.textContent = 'No bets from ' + short(Chain.userAddress) + ' yet.' +

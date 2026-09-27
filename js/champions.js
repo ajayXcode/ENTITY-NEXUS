@@ -86,7 +86,7 @@ const Champions = {
   close() {
     if (!this.root || this.root.hidden) return
     this.root.hidden = true
-    this.root.innerHTML = ''
+    this.root.textContent = ''
     this.root.setAttribute('aria-hidden', 'true')
     document.body.classList.remove('champ-picking')
   },
