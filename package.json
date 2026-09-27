@@ -1,8 +1,8 @@
 {
-  "name": "ai-fighter-arena",
+  "name": "entity-nexus",
   "version": "1.0.0",
   "private": true,
-  "description": "Build an AI fighter, reveal its strategy, bet on it, watch it fight, and let Monad settle the result. Static front end, JEV tactical advisor, rooms relay and settlement arbiter, all served by one Node process.",
+  "description": "Cast a line of film dialogue, watch it fight, bet on someone else's. Deterministic engine, dialogue vault across five cinemas, pari-mutuel pools and on-chain settlement, all served by one Node process.",
   "scripts": {
     "start": "node server.js",
     "test": "node tests/run.js"

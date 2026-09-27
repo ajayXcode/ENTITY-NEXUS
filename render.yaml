@@ -19,7 +19,7 @@
 
 services:
   - type: web
-    name: ai-fighter-arena
+    name: entity-nexus
     runtime: node
     plan: free
     region: oregon

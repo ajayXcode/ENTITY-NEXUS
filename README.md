@@ -300,6 +300,8 @@ settlement is rejected. Check with `node scripts/set-arbiter.js`.
 `render.yaml` is a blueprint: **New → Blueprint → point at this repo** and there
 is nothing to fill in but the keys.
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/shivamprajapati17/ENTITY-NEXUS)
+
 ```text
 runtime         node          one long-lived process, not functions
 plan            free
