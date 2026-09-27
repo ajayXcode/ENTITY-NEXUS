@@ -26,6 +26,9 @@ Live on **Monad Testnet** (chain `10143`):
 
 ## Run it
 
+**Live: <https://entitynexsus.onrender.com>** (Render free tier — the first
+request after ~15 idle minutes wakes the service while it cold-starts.)
+
 ```bash
 npm install          # one dependency: ethers
 npm start            # http://localhost:8080
